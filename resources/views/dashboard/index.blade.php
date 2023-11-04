@@ -9,7 +9,7 @@
 @endsection
 
 @section('breadcrumb')
-<li class="breadcrumb-item"><a href="#">Utama</a></li>
+<li class="breadcrumb-item"><a href="#">Utamas</a></li>
 @endsection
 
 @section('content')
