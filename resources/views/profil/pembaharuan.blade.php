@@ -101,9 +101,11 @@
                                 <label for="pengesahanSemak">
                                     Saya dengan ini mengesahkan bahawa pembayaran ini telah disemak
                                 </label>
+                                <br><small class="text-danger"></small>
                             </div>
                             @endcan
                             <button class="btn btn-primary btn-lg" type="button" id="btnPembayaran">Proses Pembayaran</button>
+
                         </div>
                     </div>
                 </form>
@@ -111,6 +113,7 @@
         </div>
     </div>
 </div>
+
 @endsection
 
 @section('script')
@@ -163,6 +166,17 @@
     });
 
     $('#btnPembayaran').click(function (e) {
+        @can('access-admin')
+        if($('#pengesahanSemak').is(':checked')){
+            $('#formBayaran').find('#pengesahanSemak').closest('.form-check').removeClass('text-danger');
+            $('#formBayaran').find('#pengesahanSemak').closest('.form-check').find('.text-danger').text('');
+
+        }else{
+            $('#formBayaran').find('#pengesahanSemak').closest('.form-check').addClass('text-danger');
+            $('#formBayaran').find('#pengesahanSemak').closest('.form-check').find('.text-danger').text('Sila tandakan kotak pengesahan');
+            return false;
+        }
+        @endcan
         e.preventDefault();
         if($('#formBayaran').valid()){
             $('body').waitMe({});
@@ -203,7 +217,18 @@
                         @can('access-admin')
                         }
                         @endcan
-                    }else{
+                    }else if(response.status=='success' && $('#caraPembayaran').val()=='3'){
+                        $('body').waitMe("hide");
+                        swal({
+                            title: "Berjaya!",
+                            text: 'Rekod pembayaran telah berjaya direkodkan.',
+                            icon: "success",
+                            button: "Tutup"
+                        }).then((value) => {
+                            window.location.href = "{{route('profil.index',['u'=>Crypt::encrypt($keahlian->id)])}}";
+                        });
+                    }
+                    else{
                         window.location.href = "{{env('TOYYIBPAYURL')}}/"+response.fpx.BillCode;
                     }
                 },
