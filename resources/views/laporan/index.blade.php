@@ -216,6 +216,10 @@
         e.preventDefault();
         tblBayaran.ajax.reload();
     });
+    $('#date').change(function (e) {
+        e.preventDefault();
+        tblBayaran.ajax.reload();
+    });
 </script>
 @endsection
 
