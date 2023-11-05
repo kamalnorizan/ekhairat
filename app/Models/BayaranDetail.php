@@ -26,6 +26,6 @@ class BayaranDetail extends Model
      */
     public function bayaran()
     {
-        return $this->belongsTo(bayaran::class, 'bayaran_id', 'id');
+        return $this->belongsTo(Bayaran::class, 'bayaran_id', 'id');
     }
 }
