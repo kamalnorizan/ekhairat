@@ -75,6 +75,14 @@
         </li>
         @endcan
         @endcan
+        @can('access-admin')
+        <li class="{{ Route::is('laporan.index') ? 'active' : ''}}">
+            <a href="{{ route('laporan.index') }}" class="title">
+                <span class="title">Laporan Bayaran</span>
+            </a>
+            <span class="icon-thumbnail"><i class="pg-icon">LB</i></span>
+        </li>
+        @endcan
         <li class="">
             <a href="#" class="logoutBtn"><span class="title">Log Keluar</span></a>
             <span class="icon-thumbnail"><i class="pg-icon">card</i></span>

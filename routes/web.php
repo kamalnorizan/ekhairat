@@ -142,3 +142,4 @@ Route::post('penerima/semak', [PenerimaController::class,'semak'])->name('peneri
 Route::post('penerima/store', [PenerimaController::class,'store'])->name('penerima.store');
 
 Route::get('laporan', [LaporanController::class,'index'])->name('laporan.index');
+Route::get('laporan/ajaxLoadLaporan', [LaporanController::class,'ajaxLoadLaporan'])->name('laporan.ajaxLoadLaporan');
