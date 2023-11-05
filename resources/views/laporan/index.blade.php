@@ -169,7 +169,7 @@
            '7 Hari Lepas': [moment().subtract(6, 'days'), moment()],
            'Bulan Ini': [moment().startOf('month'), moment().endOf('month')],
            'Bulan Lepas': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
-           'Sistem Baru': ['04-08-2023', moment()]
+           'Sistem Baru': ['05-08-2023', moment()]
         }
     });
 
