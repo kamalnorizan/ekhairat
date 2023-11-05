@@ -158,7 +158,6 @@
         alwaysShowCalendars: true,
         format: 'yyyy-mm-dd',
         opens: 'right',
-        showCustomRangeLabel: true,
         startDate: moment().startOf('month'),
         endDate: moment().endOf('month'),
         locale: {
@@ -168,9 +167,9 @@
            'Hari Ini': [moment(), moment()],
            'Semalam': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
            '7 Hari Lepas': [moment().subtract(6, 'days'), moment()],
-           '30 Hari Lepas': [moment().subtract(29, 'days'), moment()],
            'Bulan Ini': [moment().startOf('month'), moment().endOf('month')],
-           'Bulan Lepas': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+           'Bulan Lepas': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
+           'Sistem Baru': ['04-08-2023', moment()]
         }
     });
 
