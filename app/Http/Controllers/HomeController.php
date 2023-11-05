@@ -22,27 +22,20 @@ use League\Csv\Writer;
 use Illuminate\Support\Facades\Artisan;
 class HomeController extends Controller
 {
-    // /**
-    //  * Create a new controller instance.
-    //  *
-    //  * @return void
-    //  */
-    // public function __construct()
-    // {
-    //     $this->middleware('auth');
-    // }
 
-    /**
-     * Show the application dashboard.
-     *
-     * @return \Illuminate\Contracts\Support\Renderable
-     */
     public function index()
     {
         $ahli = StatusPengguna::where('kodstatuspengguna','21')->withCount('ahli')->first();
         $ajk = StatusPengguna::whereNotIn('kodstatuspengguna',['21','20'])->withCount('ahli')->get();
         $asnaf = StatusPengguna::where('kodstatuspengguna','20')->withCount('ahli')->first();
         $keseluruhan = StatusPengguna::withCount('ahli')->get();
+
+        $totalActive = BayaranDetail::selectRaw('tahun, count(*) as jumlah')->where('jenis','yuran')->whereHas('bayaran',function($q){
+            $q->where('statusbayaran','1');
+        })->where('tahun','>=',date('Y'))->groupBy('tahun')->get();
+
+        $ahlibaru = Bayaran::where('jenisPermohonan',2)->whereYear('kelulusanbayaran_pada','2023')->whereMonth('kelulusanbayaran_pada','>=',8)->count(); ;
+
         $countKeseluruhan = 0;
         foreach ($keseluruhan as $key => $seluruh) {
             $countKeseluruhan = $countKeseluruhan+$seluruh->ahli_count;
@@ -54,7 +47,7 @@ class HomeController extends Controller
 
         $alamat = Alamat::with('ahli')->withCount('ahli')->get();
         // dd($alamat);
-        return view('dashboard.index',compact('ahli','ajk','asnaf','keseluruhan','countKeseluruhan','countJawatan','alamat'));
+        return view('dashboard.index',compact('ahli','ajk','asnaf','keseluruhan','countKeseluruhan','countJawatan','alamat','totalActive','ahlibaru'));
     }
 
     function checkuser() {
@@ -113,7 +106,7 @@ class HomeController extends Controller
         $user->pinSidebar = $request->pin;
         $user->save();
     }
-    
+
     function generateBayaran(){
         // u642695168_khairat_table_tblbayaran.csv
         $filePath = public_path('u642695168_khairat_table_tblbayaran.csv');
@@ -123,16 +116,16 @@ class HomeController extends Controller
 
         // Read the CSV file
         $csvData = array_map('str_getcsv', file($filePath));
-        
-        
+
+
         $csvDataWithKeys = [];
         $headerRow = array_shift($csvData);
-        
+
         // Use the first column as the array key/index
         foreach ($csvData as $row) {
             $csvDataWithKeys[] = array_combine($headerRow, $row);
         }
-        
+
         $ic = '';
         $skipKey=0;
         foreach($csvDataWithKeys as $key=>$data){
@@ -144,7 +137,7 @@ class HomeController extends Controller
                             if($rekodBayaran){
                                 $bilNo = substr($rekodBayaran->nobil,8,4)+1;
                                 $bil = 'BIL'.$data['tahun'].str_repeat('0',4-strlen($bilNo)).$bilNo;
-                    
+
                             }else{
                                 $bil = 'BIL'.$data['tahun'].'0001';
                             }
@@ -165,7 +158,7 @@ class HomeController extends Controller
                                     $kelulusan = '1093';
                                 }else{
                                     $kelulusan = null;
-                                }                      
+                                }
                             }
                             $bayaran->kelulusanbayaran_oleh  = $kelulusan;
                             $bayaran->jumlahbayaran  = $data['jumlahbayaran'];
@@ -173,24 +166,24 @@ class HomeController extends Controller
                                 $bayaran->kelulusanbayaran_pada  = Carbon::createFromFormat('d/m/Y H:i', $data['masakemaskini'])->format('Y-m-d H:i:s');
                                 $bayaran->created_at  = Carbon::createFromFormat('d/m/Y H:i', $data['masakemaskini'])->format('Y-m-d H:i:s');
                                 $bayaran->updated_at  = Carbon::createFromFormat('d/m/Y H:i', $data['masakemaskini'])->format('Y-m-d H:i:s');
-                                
+
                             }
-                            
+
                             if($data['buktibayaran']!=""){
                                 $bayaran->buktibayaran  = $data['buktibayaran'];
                             }
-                            
+
                             if($data['noresit']!=""){
                                 $bayaran->noresit  = $data['noresit'];
                             }
-                            
-                            
+
+
                             if($data['carabayaran']!=""){
                                 $bayaran->carabayaran  = $data['carabayaran'];
                             }
-                            
+
                             $bayaran->save();;
-                            
+
                             $bayaranDetail = new BayaranDetail;
                             $bayaranDetail->bayaran_id=$bayaran->id;
                             $bayaranDetail->noBil = $bayaran->noBil;
@@ -202,7 +195,7 @@ class HomeController extends Controller
                                 $bayaranDetail->updated_at  = Carbon::createFromFormat('d/m/Y H:i', $data['masakemaskini'])->format('Y-m-d H:i:s');
                             }
                             $bayaranDetail->save();
-                            
+
                             $bayaranDetail = new BayaranDetail;
                             $bayaranDetail->bayaran_id=$bayaran->id;
                             $bayaranDetail->noBil = $bayaran->noBil;
@@ -214,9 +207,9 @@ class HomeController extends Controller
                                 $bayaranDetail->updated_at  = Carbon::createFromFormat('d/m/Y H:i', $data['masakemaskini'])->format('Y-m-d H:i:s');
                             }
                             $bayaranDetail->save();
-                            
+
                             $skipKey = $key+1;
-                            
+
                             if($data['derma']>0){
                                 $bayaranDetail = new BayaranDetail;
                                 $bayaranDetail->bayaran_id=$bayaran->id;
@@ -230,13 +223,13 @@ class HomeController extends Controller
                                 }
                                 $bayaranDetail->save();
                             }
-                            
+
                         }else{
                             $rekodBayaran = Bayaran::where('nobil','like','BIL'.($data['tahun']).'%')->orderBy('nobil','desc')->first();
                             if($rekodBayaran){
                                 $bilNo = substr($rekodBayaran->nobil,8,4)+1;
                                 $bil = 'BIL'.$data['tahun'].str_repeat('0',4-strlen($bilNo)).$bilNo;
-                    
+
                             }else{
                                 $bil = 'BIL'.$data['tahun'].'0001';
                             }
@@ -257,7 +250,7 @@ class HomeController extends Controller
                                     $kelulusan = '1093';
                                 }else{
                                     $kelulusan = null;
-                                }                      
+                                }
                             }
                             $bayaran->kelulusanbayaran_oleh  = $kelulusan;
                             $bayaran->jumlahbayaran  = $data['jumlahbayaran'];
@@ -265,24 +258,24 @@ class HomeController extends Controller
                                 $bayaran->kelulusanbayaran_pada  = Carbon::createFromFormat('d/m/Y H:i', $data['masakemaskini'])->format('Y-m-d H:i:s');
                                 $bayaran->created_at  = Carbon::createFromFormat('d/m/Y H:i', $data['masakemaskini'])->format('Y-m-d H:i:s');
                                 $bayaran->updated_at  = Carbon::createFromFormat('d/m/Y H:i', $data['masakemaskini'])->format('Y-m-d H:i:s');
-                                
+
                             }
-                            
+
                             if($data['buktibayaran']!=""){
                                 $bayaran->buktibayaran  = $data['buktibayaran'];
                             }
-                            
+
                             if($data['noresit']!=""){
                                 $bayaran->noresit  = $data['noresit'];
                             }
-                            
-                            
+
+
                             if($data['carabayaran']!=""){
                                 $bayaran->carabayaran  = $data['carabayaran'];
                             }
-                            
+
                             $bayaran->save();;
-                            
+
                             $bayaranDetail = new BayaranDetail;
                             $bayaranDetail->bayaran_id=$bayaran->id;
                             $bayaranDetail->noBil = $bayaran->noBil;
@@ -294,7 +287,7 @@ class HomeController extends Controller
                                 $bayaranDetail->updated_at  = Carbon::createFromFormat('d/m/Y H:i', $data['masakemaskini'])->format('Y-m-d H:i:s');
                             }
                             $bayaranDetail->save();
-                            
+
                             if($data['derma']>0){
                                 $bayaranDetail = new BayaranDetail;
                                 $bayaranDetail->bayaran_id=$bayaran->id;
@@ -314,14 +307,14 @@ class HomeController extends Controller
                     dump($e);
                 }
             }
-            
+
         }
-        
+
         // return response()->json(['data' => $csvDataWithKeys], 200);
 
-        
+
     }
-    
+
     function generateTarikhLahir(){
 
     }

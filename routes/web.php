@@ -11,6 +11,7 @@ use App\Http\Controllers\SmsblastController;
 use App\Http\Controllers\PermohonanController;
 use App\Http\Controllers\PembaharuanController;
 use App\Http\Controllers\PenerimaController;
+use App\Http\Controllers\LaporanController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 
@@ -49,8 +50,8 @@ use Illuminate\Support\Facades\Artisan;
 //             Artisan::call($request->command);
 //             dump(Artisan::output());
 //         } catch (\Throwable $th) {
-//             echo "Error : ".$th->getMessage();    
-//         }        
+//             echo "Error : ".$th->getMessage();
+//         }
 //     }else{
 //         return 'Naaah... Not Allowed !!';
 //     }
@@ -84,7 +85,7 @@ Route::post('tanggungan/deleteTanggunganAjax', [TanggunganController::class,'del
 
 Auth::routes(['register'=>false]);
 Route::get('forget-password', [FrontEndController::class, 'showForgetPasswordForm'])->name('forget.password.get');
-Route::post('forget-password', [FrontEndController::class, 'submitForgetPasswordForm'])->name('forget.password.post'); 
+Route::post('forget-password', [FrontEndController::class, 'submitForgetPasswordForm'])->name('forget.password.post');
 Route::get('reset-password/{token}', [FrontEndController::class, 'showResetPasswordForm'])->name('reset.password.get');
 Route::post('reset-password', [FrontEndController::class, 'submitResetPasswordForm'])->name('reset.password.post');
 
@@ -140,3 +141,4 @@ Route::get('penerima', [PenerimaController::class,'index'])->name('penerima.inde
 Route::post('penerima/semak', [PenerimaController::class,'semak'])->name('penerima.semak');
 Route::post('penerima/store', [PenerimaController::class,'store'])->name('penerima.store');
 
+Route::get('laporan', [LaporanController::class,'index'])->name('laporan.index');
