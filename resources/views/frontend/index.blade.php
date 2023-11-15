@@ -60,7 +60,7 @@
                 <div class="swiper-slide dark">
                     <div class="container">
                         <div class="slider-caption slider-caption-center">
-                            <h2 data-animate="fadeInUp">Selamat Datangs</h2>
+                            <h2 data-animate="fadeInUp">Selamat Datang</h2>
                             <p class="d-xs-block mt-2 bg-white text-black" data-animate="fadeInUp" data-delay="200">eKhairat Surau al-Hidayah, Bandar Saujana Putra. <br> </p>
                             <p class="d-xs-block mt-2 text-black" data-animate="fadeInUp" data-delay="200"><button type="button" class="btn btn-lg btn-warning semakKeahlianBtn">Semak/Daftar Keahlian</button> </p>
                         </div>
