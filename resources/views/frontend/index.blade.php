@@ -42,7 +42,7 @@
         color: #1c87c9;
         transition: 0.4s;
     }
-    
+
     dl, dt, dd, ol, ul, li {
         margin: 5px;
         padding: 2px;
@@ -60,7 +60,7 @@
                 <div class="swiper-slide dark">
                     <div class="container">
                         <div class="slider-caption slider-caption-center">
-                            <h2 data-animate="fadeInUp">Selamat Datang</h2>
+                            <h2 data-animate="fadeInUp">Selamat Datangs</h2>
                             <p class="d-xs-block mt-2 bg-white text-black" data-animate="fadeInUp" data-delay="200">eKhairat Surau al-Hidayah, Bandar Saujana Putra. <br> </p>
                             <p class="d-xs-block mt-2 text-black" data-animate="fadeInUp" data-delay="200"><button type="button" class="btn btn-lg btn-warning semakKeahlianBtn">Semak/Daftar Keahlian</button> </p>
                         </div>
@@ -184,7 +184,7 @@
                         <li>Kaedah pendaftaran dan bayaran secara ONLINE @ atas talian yang dibuat sendiri oleh ahli telah pun di laksanakan sejak tahun 2021 akibat pandemik Covid.19 dan akan terus digunakan pada masa akan datang.</li>
                     </ul>
                     <button type="button"  data-toggle="modal" data-target="#memo2023" class="btn btn-lg btn-warning"> Klik di sini untuk Syarat Keahlian Lengkap</button>
-                        
+
                 </div>
 
                 <div class="col-lg-6 align-self-end">
@@ -327,7 +327,7 @@
                         {!! Form::text('nokp', null, ['class' => 'form-control', 'required' => 'required']) !!}
                         <small class="text-danger">{{ $errors->first('nokp') }}</small>
                     </div>
-                    
+
                     <div class="g-recaptcha" id="g-recaptcha" data-sitekey="6LdoP6EnAAAAAJLBQhIFMxXCgd6IUIzSGg0xaoXJ"></div>
                     <button id="buttonCheck" class="btn btn-success  float-end">Semak</button>
                 </div>
@@ -532,7 +532,7 @@
     $('#buttonCheck').click(function (e) {
         e.preventDefault();
         var recaptchaValue = grecaptcha.getResponse();
-        
+
         if($("#nokp").val() == ''){
             $('#nokp').addClass('error');
             $('#nokp').closest('.form-group').find('.text-danger').text('Sila masukkan No. Kad Pengenalan');
