@@ -56,6 +56,30 @@ class ProfilController extends Controller
         return view('backend.keahlian.profil',compact('type','keahlian','lt_alamat','databayaran','tahun','configpendaftaran','configtahunsemasa'));
     }
 
+    function kemaskiniDokumen (Request $request) {
+        $validator=Validator::make($request->all(), [
+            'dokumen' => 'required|mimes:jpeg,png,jpg,pdf|max:2048'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $bayaran = Bayaran::find($request->id);
+        $file = $request->file('dokumen');
+        $fileName = Str::random(40).'.'.$file->getClientOriginalExtension();
+        $file->move(public_path('uploads/'.$bayaran->keahlian->nokp.'/'), $fileName);
+        $bayaran->buktibayaran = 'uploads/'.$bayaran->keahlian->nokp.'/'.$fileName;
+        $bayaran->save();
+
+        $data['status'] = 'success';
+        $data['buktibayaran'] = $bayaran->buktibayaran;
+        return response()->json($data, 200);
+
+    }
+
     function update(Request $request) {
         // dd($request->all());
         $id = $request->id;
@@ -392,7 +416,7 @@ class ProfilController extends Controller
 
         return response()->json(['message' => 'Berjaya disahkan'], 200);
     }
-    
+
     function sahkanPembayaranfpx(Request $request){
         $bayaran = Bayaran::find($request->id);
         $noResit = Bayaran::with('keahlian')->where('noresitnew', 'like', '%'.date('Y').'%')->orderBy('noresitnew', 'desc')->first();
@@ -451,21 +475,21 @@ class ProfilController extends Controller
     function isStringAllNumbers($str) {
         return preg_match('/^[0-9]+$/', $str) === 1;
     }
-    
+
     function semakPembayaranFpx(Request $request){
         $some_data = array(
             'billCode' => $request->kodFpx
-          );  
-        
+          );
+
           $curl = curl_init();
-        
+
           curl_setopt($curl, CURLOPT_POST, 1);
-          curl_setopt($curl, CURLOPT_URL, 'https://toyyibpay.com/index.php/api/getBillTransactions');  
+          curl_setopt($curl, CURLOPT_URL, 'https://toyyibpay.com/index.php/api/getBillTransactions');
           curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
           curl_setopt($curl, CURLOPT_POSTFIELDS, $some_data);
-        
+
           $result = curl_exec($curl);
-          $info = curl_getinfo($curl);  
+          $info = curl_getinfo($curl);
           curl_close($curl);
             $data = json_decode($result);
           return response()->json($data, 200);

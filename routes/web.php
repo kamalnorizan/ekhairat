@@ -103,6 +103,7 @@ Route::middleware(['auth', 'checkSessionTimeout'])->group(function () {
     Route::get('profil/pembaharuan/{encid}', [ProfilController::class,'pembaharuan'])->name('profil.pembaharuan');
     Route::get('profil/{u?}', [ProfilController::class,'index'])->name('profil.index');
     Route::post('profil/pembayaran', [ProfilController::class,'pembayaran'])->name('profil.pembayaran');
+    Route::post('profil/kemaskiniDokumen', [ProfilController::class,'kemaskiniDokumen'])->name('profil.kemaskiniDokumen');
     Route::post('profil/update', [ProfilController::class,'update'])->name('profil.update');
     Route::post('profil/loadPengesahan', [ProfilController::class,'loadPengesahan'])->name('profil.loadPengesahan');
     Route::post('profil/sahkanPembayaran', [ProfilController::class,'sahkanPembayaran'])->name('profil.sahkanPembayaran');
