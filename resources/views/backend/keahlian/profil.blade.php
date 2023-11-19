@@ -687,6 +687,7 @@
             contentType: false,
             processData: false,
             success: function (response) {
+                $('#iframeBukti').attr('src', '{{ asset('/') }}'+response.buktibayaran);
                 swal({
                   title: "Berjaya",
                   text: "Maklumat pembayaran telah berjaya dikemaskini",
