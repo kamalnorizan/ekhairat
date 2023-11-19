@@ -49,6 +49,24 @@
                                 <div class="fancy-title title-bottom-border">
                                     <h4>Maklumat Tanggungan</h4>
                                 </div>
+                                @php
+                                    $tanggungan = $keahlian->tangungan->count();
+                                    if($keahlian->namapasangan != ''){
+                                        $tanggungan++;
+                                    }
+                                @endphp
+                                @if ($keahlian->namapasangan != null || $keahlian->namapasangan != '')
+                                <strong>Pasangan</strong><br>
+                                {{$keahlian->namapasangan}}<br>
+                                <small>
+                                    @if ($keahlian->tlahirpasangan!=null)
+                                    {{\Carbon\Carbon::parse($keahlian->tlahirpasangan)->diff(\Carbon\Carbon::now())->format('%y tahun, %m bulan')}}
+                                    @else
+                                    N/A
+                                    @endif
+                                </small>
+                                <hr>
+                                @endif
                                 @forelse ($keahlian->tangungan as $key=>$tangungan)
                                 <strong>Tanggungan {{$key+1}}</strong></strong><br>
                                 {{$tangungan->nama}}<br>
@@ -58,10 +76,12 @@
                                     @else
                                     N/A
                                     @endif
-                                </small>to
+                                </small>
                                 <hr>
                                 @empty
-                                <div class="mt-3 mb-3 text-muted text-center">Tiada Rekod Tanggungan</div>
+                                    @if ($tanggungan == 0)
+                                        <div class="mt-3 mb-3 text-muted text-center">Tiada Rekod Tanggungan</div>
+                                    @endif
                                 @endforelse
                             </div>
                         </div>
@@ -229,5 +249,7 @@
         "paging": false,
         "responsive": true
     });
+
+
 </script>
 @endsection

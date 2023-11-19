@@ -69,9 +69,12 @@ Route::get('perincian/{encid}', [KeahlianController::class,'perincian'])->name('
 Route::get('pembaharuan/bayaran/{encid}/{type?}', [KeahlianController::class,'pembaharuanbayaran'])->name('keahlian.front.pembaharuanbayaran');
 Route::get('pembaharuan/{encid}/{type?}', [KeahlianController::class,'pembaharuan'])->name('keahlian.front.pembaharuan');
 Route::get('kemaskini/{encid}', [KeahlianController::class,'kemaskini'])->name('keahlian.front.kemaskini');
-Route::get('permohonan', [KeahlianController::class,'permohonan'])->name('keahlian.front.permohonan');
+// Route::get('permohonan', [KeahlianController::class,'permohonan'])->name('keahlian.front.permohonan');
+Route::post('pembaharuan/ajaxloadpembaharuan', [PembaharuanController::class,'ajaxloadpembaharuan'])->name('pembaharuan.ajaxloadpembaharuan');
 Route::post('pembaharuan/pembayaran', [KeahlianController::class,'pembayaran'])->name('keahlian.front.pembayaran');
+Route::post('pembaharuan/delete', [KeahlianController::class,'delete'])->name('pembaharuan.delete');
 Route::post('pembaharuan/{encid}', [KeahlianController::class,'pembaharuanStore'])->name('keahlian.front.pembaharuanStore');
+
 
 Route::post('permohonan', [KeahlianController::class,'permohonanStore'])->name('keahlian.front.permohonanStore');
 
@@ -105,7 +108,9 @@ Route::middleware(['auth', 'checkSessionTimeout'])->group(function () {
     Route::post('profil/sahkanPembayaran', [ProfilController::class,'sahkanPembayaran'])->name('profil.sahkanPembayaran');
     Route::post('profil/semakPembayaranFpx', [ProfilController::class,'semakPembayaranFpx'])->name('profil.semakPembayaranFpx');
     Route::post('profil/sahkanPembayaranfpx', [ProfilController::class,'sahkanPembayaranfpx'])->name('profil.sahkanPembayaranfpx');
+
 });
+
 
 Route::get('keahlianadm', [KeahlianController::class,'index'])->name('keahlianadm.index');
 Route::post('keahlianadm/ajaxLoadAhli', [KeahlianController::class,'ajaxLoadAhli'])->name('keahlianadm.ajaxLoadAhli');
@@ -128,9 +133,11 @@ Route::get('/smsblast',[SmsblastController::class,'smsblast'])->name('smsblast.i
 Route::get('/sms/processSend/{id}',[SmsblastController::class,'processSend'])->name('smsblast.processSend');
 
 Route::get('pembaharuan', [PembaharuanController::class,'index'])->name('pembaharuan.index');
+
 Route::get('pembaharuan/cash/{encid}', [PembaharuanController::class,'cash'])->name('pembaharuan.cash');
 
 Route::get('permohonan', [PermohonanController::class,'index'])->name('permohonan.index');
+Route::post('permohonan/ajaxloadpermohonan', [PermohonanController::class,'ajaxloadpermohonan'])->name('permohonan.ajaxloadpermohonan');
 Route::get('permohonan/checkPermohonan', [PermohonanController::class,'checkPermohonan'])->name('permohonan.checkPermohonan');
 
 

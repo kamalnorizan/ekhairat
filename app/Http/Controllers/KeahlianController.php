@@ -33,7 +33,7 @@ class KeahlianController extends Controller
         $jalan = Alamat::pluck('keterangan','id');
         return view('backend.keahlian.index', compact('kategoriKeahlian','jalan'));
     }
-    
+
 
     function ajaxLoadAhli(Request $request){
         $keahlian = Keahlian::with('bayaranDetails','bayaranDetailsPaid')->select('nama','statusahli','nokp','alamat','id');
@@ -131,23 +131,23 @@ class KeahlianController extends Controller
         $databayaran=$databayaran->sortBy('tahun');
         $configpendaftaran=Config::where('type','pendaftaran')->first();
         $configtahunsemasa=Config::whereType('tahunsemasa')->first();
-        
+
         $semakBayaranFpx = $keahlian->bayaran->where('statusbayaran',0)->where('carabayaran','FPX');
         if($semakBayaranFpx->count()>0){
             foreach($semakBayaranFpx as $semakBayaranFpxSingle){
                 $some_data = array(
                     'billCode' => $semakBayaranFpxSingle->billCode
-                );  
-                
+                );
+
                 $curl = curl_init();
-                
+
                 curl_setopt($curl, CURLOPT_POST, 1);
-                curl_setopt($curl, CURLOPT_URL, 'https://toyyibpay.com/index.php/api/getBillTransactions');  
+                curl_setopt($curl, CURLOPT_URL, 'https://toyyibpay.com/index.php/api/getBillTransactions');
                 curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
                 curl_setopt($curl, CURLOPT_POSTFIELDS, $some_data);
-            
+
                 $result = curl_exec($curl);
-                $info = curl_getinfo($curl);  
+                $info = curl_getinfo($curl);
                 curl_close($curl);
                 $data = json_decode($result);
                 if($data[0]->billpaymentStatus=='1'){
@@ -355,7 +355,7 @@ class KeahlianController extends Controller
                 unset($yearsToRenew[$key]);
             }
         }
-        
+
         return view('frontend.keahlian.pembaharuanbayar', compact('keahlian','yearsToRenew','type'));
     }
 
@@ -379,12 +379,12 @@ class KeahlianController extends Controller
                 'errors' => $validator->errors(),
             ], 422);
         }
-        
+
         $tahun = $request->checkboxTahun;
         $checkbayaran = Bayaran::where('nokp',$request->nokp)->where('statusbayaran',0)->whereHas('bayaranDetails', function($q) use ($tahun) {
             $q->whereIn('tahun',$tahun);
         })->first();
-        
+
         if($checkbayaran){
              $checkbayaran->forceDelete();
         }
@@ -406,7 +406,7 @@ class KeahlianController extends Controller
         if($request->has('type') && $request->type == 'm'){
             $bayaran->jenisPermohonan ='2';
         }
-        
+
         if($request->caraPembayaran=='1'){
             $bayaran->carabayaran = 'ONLINE';
             $bayaran->statusbayaran = '2';
@@ -452,7 +452,7 @@ class KeahlianController extends Controller
             }else{
                 $email = 'bbksahbsp@gmail.com';
             }
-            
+
             $some_data = array(
                 'userSecretKey'=>env('TOYYIBPAYCODE'),
                 'categoryCode'=>env('TOYYIBPAYCATEGORY'),
@@ -471,8 +471,8 @@ class KeahlianController extends Controller
                 'billContentEmail'=>'Terima kasih kerana telah bersama eKhairat!',
                 'billChargeToCustomer'=>1
             );
-            
-            
+
+
 
             $curl = curl_init();
             curl_setopt($curl, CURLOPT_POST, 1);
@@ -484,7 +484,7 @@ class KeahlianController extends Controller
             $info = curl_getinfo($curl);
             curl_close($curl);
             $obj = json_decode($result);
-            
+
             $data['fpx']=$obj[0];
             $bayaran->billCode = $obj[0]->BillCode;
             $bayaran->save();
@@ -598,6 +598,12 @@ class KeahlianController extends Controller
                 // return redirect()->route('profil.index', ['u'=>Crypt::encrypt($keahlian->id)]);
             }
         }
+    }
+
+    function delete(Request $request){
+        $bayaran = Bayaran::find($request->id);
+        $bayaran->forceDelete();
+        return response()->json(['status'=>'success']);
     }
 
 }

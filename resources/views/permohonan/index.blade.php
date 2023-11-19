@@ -4,43 +4,43 @@
 @endsection
 
 @section('breadcrumb')
-<li class="breadcrumb-item"><a href="#">Senarai Permohonan</a></li>
+    <li class="breadcrumb-item"><a href="#">Senarai Permohonan</a></li>
 @endsection
 
 @section('content')
-<div class="row">
-    <div class="col-md-12">
-        <div class="card card-default">
-            <div class="card-header">
-                Senarai Permohonan
-            </div>
-            <div class="card-body">
-                <table class="table table-hover" id="mytable">
-                    <thead>
-                        <tr>
-                            <th>
-                                Nama
-                            </th>
-                            <th>
-                                No K/P
-                            </th>
-                            <th>
-                                Umur
-                            </th>
-                            <th>
-                                Tarikh lahir
-                            </th>
-                            <th>
-                                Alamat
-                            </th>
-                            <th>
-                                Tindakan
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card card-default">
+                <div class="card-header">
+                    Senarai Permohonan
+                </div>
+                <div class="card-body">
+                    <table class="table table-hover" id="mytable">
+                        <thead>
+                            <tr>
+                                <th>
+                                    Nama
+                                </th>
+                                <th>
+                                    No K/P
+                                </th>
+                                <th>
+                                    Umur
+                                </th>
+                                <th>
+                                    Tarikh lahir
+                                </th>
+                                <th>
+                                    Alamat
+                                </th>
+                                <th>
+                                    Tindakan
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
 
-                        @forelse($bayaran as $bayar)
+                            {{-- @forelse($bayaran as $bayar)
                         <tr>
                             <td>
                                 {{ $bayar->keahlian->nama }}
@@ -59,6 +59,9 @@
                             </td>
                             <td>
                                 <a href="{{ route('profil.index', Crypt::encrypt($bayar->keahlian->id)) }}" class="btn btn-sm btn-primary">Perincian</a>
+                                @can('access-systemadmin')
+                                <button type="button" data-id="{{$bayar->id}}" class="btn btn-sm btn-danger btn-del">Padam</button>
+                                @endcan
                             </td>
                         </tr>
                         @empty
@@ -67,22 +70,91 @@
                                 <span class="text-muted">Tiada permohonan baharu setakat ini</span>
                             </td>
                         </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+                        @endforelse --}}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
-</div>
 @endsection
 
 @section('script')
-<script>
-    @if ($bayaran->count()>0)
-        $('#mytable').DataTable({
-            "order": [[ 0, "asc" ]]
+    <script>
+        var table = $('#mytable').DataTable({
+            "processing": true,
+            "serverSide": true,
+            "ajax": {
+                "method": 'POST', // Type of response and matches what we said in the route
+                "url": "{{ route('permohonan.ajaxloadpermohonan') }}",
+                "dataType": "json",
+                "data": {
+                    _token: "{{ csrf_token() }}"
+                }
+            },
+            "columns": [{
+                    "data": "nama"
+                },
+                {
+                    "data": "nokp"
+                },
+                {
+                    "data": "umur"
+                },
+                {
+                    "data": "tarikhlahir"
+                },
+                {
+                    "data": "alamat"
+                },
+                {
+                    "data": "tindakan"
+                }
+            ]
         });
-    @endif
-</script>
-@endsection
 
+        $(document).on("click", ".btn-del", function(e) {
+            e.preventDefault();
+            var id = $(this).data('id');
+            swal({
+                title: "Adakah anda pasti?",
+                text: "Tindakan anda akan memadam rekod pembayaran/permohonan dari pengguna!",
+                icon: "warning",
+                buttons: {
+                    cancel: {
+                        text: "Batal",
+                        value: null,
+                        visible: true,
+                        className: "",
+                        closeModal: true,
+                    },
+                    confirm: {
+                        text: "Ya, saya pasti.",
+                        value: true,
+                        visible: true,
+                        className: "btn-danger",
+                        closeModal: true
+                    }
+                }
+            }).then((value) => {
+                if (value == true) {
+                    $.ajax({
+                        type: "post",
+                        url: "{{ route('pembaharuan.delete') }}",
+                        data: {
+                            _token: '{{ csrf_token() }}',
+                            id: id
+                        },
+                        dataType: "json",
+                        success: function(response) {
+                            table.ajax.reload();
+                            swal("Berjaya!",
+                                "Rekod pembayaran/permohonan telah berjaya dipadam.",
+                                "success");
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+@endsection
