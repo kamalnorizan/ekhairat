@@ -121,7 +121,7 @@
             ]
         });
 
-    $('.btn-del').click(function (e) {
+    $(document).on("click", ".btn-del", function(e) {
         e.preventDefault();
         var id = $(this).data('id');
        swal({
