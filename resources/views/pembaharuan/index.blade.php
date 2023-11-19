@@ -153,9 +153,8 @@
                    },
                    dataType: "json",
                    success: function (response) {
-                       swal("Berjaya!", "Rekod pembayaran/permohonan telah berjaya dipadam.", "success").then(()=>{
-                            window.location.reload();
-                       });
+                        table.ajax.reload();
+                       swal("Berjaya!", "Rekod pembayaran/permohonan telah berjaya dipadam.", "success");
                    }
                });
            }
