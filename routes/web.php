@@ -62,6 +62,8 @@ Route::middleware(['visitcounter'])->group(function () {
     Route::get('/', [FrontEndController::class,'index'])->name('index');
 });
 
+Route::get('/maintainance/index', [MaintainanceController::class,'index'])->name('maintainance.index')->middleware('auth');
+
 Route::post('/checkKeahlian', [FrontEndController::class,'checkKeahlian'])->name('front.checkKeahlian');
 Route::get('/checkKeahlian/{ic}', [FrontEndController::class,'checkKeahlianBe'])->name('front.checkKeahlianBe');
 Route::get('keahlian', [KeahlianController::class,'frontIndex'])->name('keahlian.front.index');
@@ -74,6 +76,7 @@ Route::post('pembaharuan/ajaxloadpembaharuan', [PembaharuanController::class,'aj
 Route::post('pembaharuan/pembayaran', [KeahlianController::class,'pembayaran'])->name('keahlian.front.pembayaran');
 Route::post('pembaharuan/delete', [KeahlianController::class,'delete'])->name('pembaharuan.delete');
 Route::post('pembaharuan/{encid}', [KeahlianController::class,'pembaharuanStore'])->name('keahlian.front.pembaharuanStore');
+
 
 
 Route::post('permohonan', [KeahlianController::class,'permohonanStore'])->name('keahlian.front.permohonanStore');

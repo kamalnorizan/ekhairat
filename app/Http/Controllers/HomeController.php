@@ -135,7 +135,7 @@ class HomeController extends Controller
                         if($data['jumlahbayaran'] - $data['derma'] > $data['bayaran']){
                             $rekodBayaran = Bayaran::where('nobil','like','BIL'.($data['tahun']).'%')->orderBy('nobil','desc')->first();
                             if($rekodBayaran){
-                                $bilNo = substr($rekodBayaran->nobil,8,4)+1;
+                                $bilNo = substr($rekodBayaran->nobil,7,4)+1;
                                 $bil = 'BIL'.$data['tahun'].str_repeat('0',4-strlen($bilNo)).$bilNo;
 
                             }else{
@@ -227,7 +227,7 @@ class HomeController extends Controller
                         }else{
                             $rekodBayaran = Bayaran::where('nobil','like','BIL'.($data['tahun']).'%')->orderBy('nobil','desc')->first();
                             if($rekodBayaran){
-                                $bilNo = substr($rekodBayaran->nobil,8,4)+1;
+                                $bilNo = substr($rekodBayaran->nobil,7,4)+1;
                                 $bil = 'BIL'.$data['tahun'].str_repeat('0',4-strlen($bilNo)).$bilNo;
 
                             }else{

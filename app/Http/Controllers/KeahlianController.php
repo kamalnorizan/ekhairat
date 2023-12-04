@@ -392,9 +392,8 @@ class KeahlianController extends Controller
         $keahlian = Keahlian::where('nokp',$request->nokp)->first();
         $rekodBayaran = Bayaran::where('nobil','like','BIL'.date('Y').'%')->orderBy('nobil','desc')->first();
         if($rekodBayaran){
-            $bilNo = substr($rekodBayaran->nobil,8,4)+1;
+            $bilNo = substr($rekodBayaran->nobil,7,4)+1;
             $bil = 'BIL'.date('Y').str_repeat('0',4-strlen($bilNo)).$bilNo;
-
         }else{
             $bil = 'BIL'.date('Y').'0001';
         }
