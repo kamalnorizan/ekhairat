@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Bayaran;
 use Carbon\Carbon;
 use Crypt;
+use Auth;
 use DataTables;
 use Illuminate\Support\Facades\Gate;
 class PembaharuanController extends Controller
@@ -41,7 +42,7 @@ class PembaharuanController extends Controller
             })
             ->addColumn('tindakan', function(Bayaran $row){
                 $btn = '<a href="'.route('profil.index', Crypt::encrypt($row->keahlian->id)).'" class="btn btn-sm btn-primary">Perincian</a>';
-                if (Gate::allows('access-systemadmin')) {
+                if (Gate::allows('access-systemadmin')  || Auth::user()->id == 1091) {
                     $btn .= '<button type="button" data-id="'.$row->id.'" class="btn btn-sm btn-danger btn-del">Padam</button>';
                 }
                 return $btn;
