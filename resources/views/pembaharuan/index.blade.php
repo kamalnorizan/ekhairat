@@ -92,6 +92,7 @@
     var table = $('#mytable').DataTable({
             "processing": true,
             "serverSide": true,
+            "responsive": true,
             "ajax": {
                 "method": 'POST', // Type of response and matches what we said in the route
                 "url": "{{ route('pembaharuan.ajaxloadpembaharuan') }}",

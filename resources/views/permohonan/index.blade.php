@@ -83,6 +83,7 @@
     <script>
         var table = $('#mytable').DataTable({
             "processing": true,
+            "responsive": true,
             "serverSide": true,
             "ajax": {
                 "method": 'POST', // Type of response and matches what we said in the route

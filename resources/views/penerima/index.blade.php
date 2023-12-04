@@ -171,6 +171,7 @@
 @section('script')
 <script>
     $('#tablePenerima').DataTable({
+        "responsive": true,
         "order": [[ 0, "asc" ]]
     });
 

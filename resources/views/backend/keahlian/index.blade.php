@@ -90,6 +90,7 @@
     var tableAhli = $('#tableAhli').DataTable({
         "processing": true,
         "serverSide": true,
+        "responsive": true,
         "ajax":{
             "method": "POST",
             "url": "{{ route('keahlianadm.ajaxLoadAhli') }}",
