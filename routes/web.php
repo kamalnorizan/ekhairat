@@ -63,7 +63,7 @@ Route::middleware(['visitcounter'])->group(function () {
     Route::get('/', [FrontEndController::class,'index'])->name('index');
 });
 
-// Route::get('/maintainance/index', [MaintainanceController::class,'index'])->name('maintainance.index')->middleware('auth');
+Route::get('/maintainance/checkfpx', [MaintainanceController::class,'index'])->name('maintainance.index')->middleware('auth');
 
 Route::post('/checkKeahlian', [FrontEndController::class,'checkKeahlian'])->name('front.checkKeahlian');
 Route::get('/checkKeahlian/{ic}', [FrontEndController::class,'checkKeahlianBe'])->name('front.checkKeahlianBe');
