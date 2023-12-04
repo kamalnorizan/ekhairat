@@ -27,43 +27,43 @@ use Illuminate\Support\Facades\Artisan;
 |
 */
 
-Route::get('/m-artisan', function () {
-    if( env('CUSTOM_ARTISAN') ){
-        echo "<form method=post>";
-        echo "<input type='hidden' name='_token' value='" . csrf_token() . "' />";
-        echo "<input type='text' name='command' placeholder='Write your artisan command here' />";
-        echo "<button>Execute</button>";
-        echo "</form>";
-        return 'write command without php artisan.';
-    }else{
-        return "Naaah... Not Allowed !!";
-    }
+// Route::get('/m-artisan', function () {
+//     if( env('CUSTOM_ARTISAN') ){
+//         echo "<form method=post>";
+//         echo "<input type='hidden' name='_token' value='" . csrf_token() . "' />";
+//         echo "<input type='text' name='command' placeholder='Write your artisan command here' />";
+//         echo "<button>Execute</button>";
+//         echo "</form>";
+//         return 'write command without php artisan.';
+//     }else{
+//         return "Naaah... Not Allowed !!";
+//     }
 
-});
-Route::post('/m-artisan', function (Request $request) {
-    if (env('CUSTOM_ARTISAN')) {
-        echo "<form method=post>";
-        echo "<input type='hidden' name='_token' value='" . csrf_token() . "' />";
-        echo "<input type='text' name='command' value='".$request->command."' placeholder='writ your artisan command here' />";
-        echo "<button>Execute</button>";
-        echo "</form>";
-        try {
-            Artisan::call($request->command);
-            dump(Artisan::output());
-        } catch (\Throwable $th) {
-            echo "Error : ".$th->getMessage();
-        }
-    }else{
-        return 'Naaah... Not Allowed !!';
-    }
-    return 'Command executed';
-});
+// });
+// Route::post('/m-artisan', function (Request $request) {
+//     if (env('CUSTOM_ARTISAN')) {
+//         echo "<form method=post>";
+//         echo "<input type='hidden' name='_token' value='" . csrf_token() . "' />";
+//         echo "<input type='text' name='command' value='".$request->command."' placeholder='writ your artisan command here' />";
+//         echo "<button>Execute</button>";
+//         echo "</form>";
+//         try {
+//             Artisan::call($request->command);
+//             dump(Artisan::output());
+//         } catch (\Throwable $th) {
+//             echo "Error : ".$th->getMessage();
+//         }
+//     }else{
+//         return 'Naaah... Not Allowed !!';
+//     }
+//     return 'Command executed';
+// });
 
 Route::middleware(['visitcounter'])->group(function () {
     Route::get('/', [FrontEndController::class,'index'])->name('index');
 });
 
-Route::get('/maintainance/index', [MaintainanceController::class,'index'])->name('maintainance.index')->middleware('auth');
+// Route::get('/maintainance/index', [MaintainanceController::class,'index'])->name('maintainance.index')->middleware('auth');
 
 Route::post('/checkKeahlian', [FrontEndController::class,'checkKeahlian'])->name('front.checkKeahlian');
 Route::get('/checkKeahlian/{ic}', [FrontEndController::class,'checkKeahlianBe'])->name('front.checkKeahlianBe');
