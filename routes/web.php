@@ -12,6 +12,7 @@ use App\Http\Controllers\PermohonanController;
 use App\Http\Controllers\PembaharuanController;
 use App\Http\Controllers\PenerimaController;
 use App\Http\Controllers\LaporanController;
+use App\Http\Controllers\MaintainanceController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 
