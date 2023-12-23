@@ -507,6 +507,7 @@
 </div>
 @endsection
 @section('script')
+<script type="text/javascript" src="{{ asset('res/assets/plugins/jquery-inputmask/jquery.inputmask.min.js') }}"></script>
 <script>
 	var blink = document.getElementById('blink');
 	setInterval(function() {
@@ -518,16 +519,9 @@
         $('#menuSemakKeahlian').click();
     });
 
-	$("#nokp").keyup(function(){
-		var s= $("#nokp").val();
-		if(s.length == 6){
-			$("#nokp").val(s+"-");
-		}
-
-		if(s.length == 9){
-			$("#nokp").val(s+"-");
-		}
-	});
+    $(function ($) {
+        $("#nokp").mask("999999-99-9999");
+    });
 
     $('#buttonCheck').click(function (e) {
         e.preventDefault();
