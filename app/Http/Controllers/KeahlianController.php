@@ -255,7 +255,12 @@ class KeahlianController extends Controller
                     $year = '19'.$year;
                 }
                 $tarikh = $year.'-'.$month.'-'.$day;
-                $tanggungan->tlahir = Carbon::parse($tarikh)->format('Y-m-d');
+                try {
+                    $tarikhLahir = Carbon::parse($tarikh)->format('Y-m-d');
+                } catch (\Throwable $th) {
+                    $tarikhLahir = Carbon::now->subYears($request->umurTanggungan[$key])->format('Y-m-d');
+                }
+                $tanggungan->tlahir = $tarikhLahir;
                 $tanggungan->nokpketua = $keahlian->nokp;
                 $tanggungan->save();
             }
