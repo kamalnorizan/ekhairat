@@ -12,6 +12,7 @@ class PenerimaController extends Controller
 {
     function index() {
         $senaraiPenerima = Penerima::all();
+        // dd($senaraiPenerima->last());
         return view('penerima.index', compact('senaraiPenerima'));
     }
 
@@ -40,12 +41,21 @@ class PenerimaController extends Controller
                     $data['type']='tanggungan';
                     $data['keahlian']=$tanggungan->ketua;
                     $data['tanggungan']=$tanggungan;
+                    $keahlian = $tanggungan->ketua;
                 }else{
                     $data['status']='fail';
                 }
             }
         }
-
+        $status_aktif = 'false';
+        $bayaranDetails = null;
+        if($data['status']=='success'){
+            $bayaranDetails = $keahlian->bayaranDetailsPaid->where('jenis','yuran')->where('tahun',Carbon::parse($request->tarikhMeninggal)->format('Y'))->first();
+        }
+        if($bayaranDetails){
+            $status_aktif = 'true';
+        }
+        $data['status_aktif'] = $status_aktif;
         return response()->json($data, 200);
     }
 
@@ -75,7 +85,7 @@ class PenerimaController extends Controller
             $penerima->tabung = $request->tabung;
             $penerima->kubur = $request->kubur;
             $penerima->ulasan = $request->ulasan;
-            $penerima->status = '1';
+            $penerima->status = '0';
         }
         $penerima->save();
 
