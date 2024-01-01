@@ -118,8 +118,8 @@
                                 <i class="fa fa-check-circle fa-5x  font-large-2 float-left" style="color: #25a075"></i>
                             </div>
                             <div class="media-body text-right">
-                                <h3>{{ $totalActive->where('tahun','2023')->first()->jumlah }}</h3>
-                                <span>AHLI AKTIF 2023</span>
+                                <h3>{{ $totalActive->where('tahun',date('Y'))->first()->jumlah }}</h3>
+                                <span>AHLI AKTIF {{ date('Y') }}</span>
                             </div>
                         </div>
                     </div>
@@ -135,8 +135,8 @@
                                 <i class="fa fa-check-circle fa-5x font-large-2 float-left" style="color: rgb(69, 176, 139)"></i>
                             </div>
                             <div class="media-body text-right">
-                                <h3>{{ $totalActive->where('tahun','2024')->first()->jumlah }}</h3>
-                                <span>AHLI AKTIF 2024</span>
+                                <h3>{{ $totalActive->where('tahun',date('Y')+1)->first()->jumlah }}</h3>
+                                <span>AHLI AKTIF {{ date('Y')+1 }}</span>
                             </div>
                         </div>
                     </div>
@@ -152,8 +152,8 @@
                                 <i class="fa fa-check-circle fa-5x font-large-2 float-left" style="color: rgb(63, 191, 146)"></i>
                             </div>
                             <div class="media-body text-right">
-                                <h3>{{ $totalActive->where('tahun','2025')->first()->jumlah }}</h3>
-                                <span>AHLI AKTIF 2025</span>
+                                <h3>{{ $totalActive->where('tahun',date('Y')+2)->first() ? $totalActive->where('tahun',date('Y')+2)->first()->jumlah : '0' }}</h3>
+                                <span>AHLI AKTIF {{ date('Y')+2 }}</span>
                             </div>
                         </div>
                     </div>
