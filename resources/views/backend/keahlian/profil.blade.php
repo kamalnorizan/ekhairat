@@ -331,6 +331,10 @@
                                         <button class="btn btn-lg btn-primary btnPembayaran"  type="button" data-type='kemaskini'>Kemaskini Maklumat Keahlian</button>
                                         @if ($configpendaftaran->value==1)
                                         <button class="btn btn-lg btn-success btnPembayaran" data-type='pembaharuan'>Pembaharuan Sesi {{$configtahunsemasa->value}}</button>
+                                        @else
+                                            @canany(['access-systemadmin','access-admin','access-superadmin'])
+                                            <button class="btn btn-lg btn-success btnPembayaran" data-type='pembaharuan'>Pembaharuan Sesi {{$configtahunsemasa->value}}</button>
+                                            @endcanany
                                         @endif
                                     </div>
                                 </div>
