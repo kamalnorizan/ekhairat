@@ -844,6 +844,11 @@
         }
     });
 
+    $('.semakbayaranfpx').click(function (e) {
+        e.preventDefault();
+        alert('test');
+    });
+
     function loadTanggungan() {
         $.ajax({
             type: "post",

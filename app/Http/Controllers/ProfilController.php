@@ -31,6 +31,47 @@ class ProfilController extends Controller
         }else{
             $keahlian = Auth::user()->keahlian;
         }
+        //semak fpx
+        $bayaranFpx = Bayaran::where('nokp',$keahlian->nokp)->where('carabayaran','FPX')->where('statusbayaran','4')->get();
+        foreach($bayaranFpx as $bayaranf) {
+            if($bayaranf->billCode != null || $bayaranf->billCode != ''){
+                $client = new Client();
+                $options = [
+                'multipart' => [
+                    [
+                    'name' => 'billCode',
+                    'contents' => $bayaranf->billCode
+                    ],
+                    [
+                    'name' => 'billpaymentStatus',
+                    'contents' => '1'
+                    ]
+                ]];
+                //post request
+                $promise = $client->postAsync('https://toyyibpay.com/index.php/api/getBillTransactions', $options);
+
+                $promise->then(
+                    function ($response) use ($bayaranf) {
+                        $data = json_decode($response->getBody()->getContents());
+
+                        if($data[0]->billpaymentStatus == '1'){
+                            $noResit = Bayaran::with('keahlian')->where('noresitnew', 'like', '%'.date('Y').'%')->orderBy('noresitnew', 'desc')->first();
+                            $resitNew = substr($noResit->noresitnew,5,4) + 1;
+                            $resitNew = 'R'.date('Y').str_pad($resitNew, 4, '0', STR_PAD_LEFT);
+                            $bayaranf->statusbayaran = '1';
+                            $bayaranf->refnumber = $data[0]->billpaymentInvoiceNo;
+                            $bayaranf->noresitnew = $resitNew;
+                            $bayaranf->save();
+                        }
+                    },
+                    function ($exception) {
+                        echo $exception->getMessage();
+                    }
+                );
+                $promise->wait();
+            }
+        }
+
         $lt_alamat = Alamat::pluck('keterangan','id');
         $tahun = Tahun::all();
         $databayaran = collect();
@@ -49,6 +90,8 @@ class ProfilController extends Controller
                ];
             }
         }
+
+
 
         $databayaran=$databayaran->sortBy('tahun');
         $configpendaftaran=Config::where('type','pendaftaran')->first();
