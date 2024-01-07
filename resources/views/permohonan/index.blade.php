@@ -7,12 +7,19 @@
     <li class="breadcrumb-item"><a href="#">Senarai Permohonan</a></li>
 @endsection
 
+@section('actions')
+<div class="float-right">
+    <a href="{{ route('permohonan.create') }}" class="btn btn-sm btn-primary"> <i class="fa fa-plus"></i> &nbsp;Daftar Baru</a>
+</div>
+@endsection
+
 @section('content')
     <div class="row">
         <div class="col-md-12">
             <div class="card card-default">
                 <div class="card-header">
                     Senarai Permohonan
+
                 </div>
                 <div class="card-body">
                     <table class="table table-hover" id="mytable">

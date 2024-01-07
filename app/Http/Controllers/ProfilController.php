@@ -22,6 +22,7 @@ use GuzzleHttp\Promise;
 use Crypt;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
+
 class ProfilController extends Controller
 {
     function index($u=null) {
@@ -197,7 +198,7 @@ class ProfilController extends Controller
 
     }
 
-    function pembaharuan($encid) {
+    function pembaharuan($encid, $type=null) {
         try {
             $id = Crypt::decrypt($encid);
         } catch (\Throwable $th) {
@@ -213,7 +214,8 @@ class ProfilController extends Controller
                 unset($yearsToRenew[$key]);
             }
         }
-        return view('profil.pembaharuan', compact('keahlian','yearsToRenew'));
+
+        return view('profil.pembaharuan', compact('keahlian','yearsToRenew','type'));
     }
 
     function pembayaran(Request $request) {
@@ -225,6 +227,7 @@ class ProfilController extends Controller
             'buktiSumbangan' => 'required_if:caraPembayaran,1|mimes:jpeg,png,jpg,pdf|max:1024'
         ]);
 
+        // dd($request->all());
 
         if ($validator->fails()) {
             return response()->json([
@@ -254,14 +257,20 @@ class ProfilController extends Controller
             $fileName = Str::random(40).'.'.$file->getClientOriginalExtension();
             $file->move(public_path('uploads/'.$request->nokp.'/'), $fileName);
             $bayaran->buktibayaran = 'uploads/'.$request->nokp.'/'.$fileName;
-        }
-        if($request->caraPembayaran=='2'){
+        }else if($request->caraPembayaran=='2'){
             $bayaran->carabayaran = 'FPX';
             $bayaran->statusbayaran = '0';
-        }
-        if($request->caraPembayaran=='3'){
+        }else if($request->caraPembayaran=='3'){
             $bayaran->carabayaran = 'TUNAI';
             $bayaran->statusbayaran = '0';
+        }else if($request->caraPembayaran=='4'){
+            $bayaran->carabayaran = 'TAJAAN';
+            $bayaran->statusbayaran = '1';
+            $bayaran->jumlahbayaran = '0';
+        }else if($request->caraPembayaran=='5'){
+            $bayaran->carabayaran = 'TAJAAN';
+            $bayaran->statusbayaran = '1';
+            $bayaran->jumlahbayaran = '0';
         }
 
         if($request->has('pengesahanSemak')){
@@ -282,7 +291,13 @@ class ProfilController extends Controller
                 $bayaranDetail->jenis = 'yuran';
                 $bayaranDetail->tahun = $value;
                 $bayaranDetail->bayaran_id = $bayaran->id;
-                $bayaranDetail->amaun = 50.00;
+                if($request->caraPembayaran=='4'){
+                    $bayaranDetail->amaun = 0.00;
+                }elseif($request->caraPembayaran=='5'){
+                    $bayaranDetail->amaun = 0.00;
+                }else{
+                    $bayaranDetail->amaun = 50.00;
+                }
                 $bayaranDetail->save();
             }
         }
@@ -296,6 +311,7 @@ class ProfilController extends Controller
             $bayaranDetail->amaun = $request->derma;
             $bayaranDetail->save();
         }
+
         if($request->caraPembayaran=='2'){
             $tajuk='';
             foreach ($bayaran->bayaranDetails->where('jenis','yuran') as $key => $value) {
@@ -345,42 +361,45 @@ class ProfilController extends Controller
 
         if($request->has('pengesahanSemak')){
             $phoneNumber = $bayaran->keahlian->notel_hp;
+
             if ($phoneNumber!=null && $phoneNumber!='') {
                 $phoneNumber= str_replace(' ', '', $phoneNumber);
                 $phoneNumber= str_replace('-', '', $phoneNumber);
                 if(substr($phoneNumber, 0, 1) == '0'){
                     $phoneNumber = '6'.$phoneNumber;
                 }
-                if($this->isStringAllNumbers($phoneNumber)){
-                    $mesej = 'Pembayaran anda sebanyak RM '.$bayaran->jumlahbayaran.' telah disahkan. No resit anda adalah '.$bayaran->noresitnew.'. Sila cetak resit anda di sistem ekhairat';
-                    $smsBlast = new Smsblast;
-                    $smsBlast->msg = $mesej;
-                    $smsBlast->dateToBlast = date('Y-m-d');
-                    $smsBlast->status = 'pending';
-                    $smsBlast->msgCode = Str::random(14);
-                    $smsBlast->created_by = Auth::user()->id;
-                    $smsBlast->save();
+                if($request->caraPembayaran=='1' || $request->caraPembayaran=='2' || $request->caraPembayaran=='3'){
+                    if($this->isStringAllNumbers($phoneNumber)){
+                        $mesej = 'Pembayaran anda sebanyak RM '.$bayaran->jumlahbayaran.' telah disahkan. No resit anda adalah '.$bayaran->noresitnew.'. Sila cetak resit anda di sistem ekhairat';
+                        $smsBlast = new Smsblast;
+                        $smsBlast->msg = $mesej;
+                        $smsBlast->dateToBlast = date('Y-m-d');
+                        $smsBlast->status = 'pending';
+                        $smsBlast->msgCode = Str::random(14);
+                        $smsBlast->created_by = Auth::user()->id;
+                        $smsBlast->save();
 
-                    $customRreferenceId = Str::random(6);
-                    $smsblastGroup = new SmsblastGroup;
-                    $smsblastGroup->smsblast_id = $smsBlast->id;
-                    $smsblastGroup->customRreferenceId = $customRreferenceId;
-                    $smsblastGroup->status = 'pending';
-                    $smsblastGroup->save();
+                        $customRreferenceId = Str::random(6);
+                        $smsblastGroup = new SmsblastGroup;
+                        $smsblastGroup->smsblast_id = $smsBlast->id;
+                        $smsblastGroup->customRreferenceId = $customRreferenceId;
+                        $smsblastGroup->status = 'pending';
+                        $smsblastGroup->save();
 
-                    $smsblastDetail = new SmsblastDetail;
-                    $smsblastDetail->smsblast_id = $smsBlast->id;
-                    $smsblastDetail->smsblast_group_id = $smsblastGroup->id;
-                    $phoneNumber= str_replace(' ', '', $phoneNumber);
-                    $phoneNumber= str_replace('-', '', $phoneNumber);
-                    if(substr($phoneNumber, 0, 1) == '0'){
-                        $phoneNumber = '6'.$phoneNumber;
+                        $smsblastDetail = new SmsblastDetail;
+                        $smsblastDetail->smsblast_id = $smsBlast->id;
+                        $smsblastDetail->smsblast_group_id = $smsblastGroup->id;
+                        $phoneNumber= str_replace(' ', '', $phoneNumber);
+                        $phoneNumber= str_replace('-', '', $phoneNumber);
+                        if(substr($phoneNumber, 0, 1) == '0'){
+                            $phoneNumber = '6'.$phoneNumber;
+                        }
+                        $smsblastDetail->phoneNumber = $phoneNumber;
+                        $smsblastDetail->status = 'pending';
+                        $smsblastDetail->save();
+
+                        dispatch(new SendSMS($smsBlast->smsBlastGroups->first()->id));
                     }
-                    $smsblastDetail->phoneNumber = $phoneNumber;
-                    $smsblastDetail->status = 'pending';
-                    $smsblastDetail->save();
-
-                    dispatch(new SendSMS($smsBlast->smsBlastGroups->first()->id));
                 }
             }
         }

@@ -104,7 +104,7 @@ Route::post('home/updatePinAjax', [HomeController::class,'updatePinAjax'])->name
 
 Route::middleware(['auth', 'checkSessionTimeout'])->group(function () {
     Route::get('profil/resit/{encid}', [ProfilController::class,'resit'])->name('profil.resit');
-    Route::get('profil/pembaharuan/{encid}', [ProfilController::class,'pembaharuan'])->name('profil.pembaharuan');
+    Route::get('profil/pembaharuan/{encid}/{type?}', [ProfilController::class,'pembaharuan'])->name('profil.pembaharuan');
     Route::get('profil/{u?}', [ProfilController::class,'index'])->name('profil.index');
     Route::post('profil/pembayaran', [ProfilController::class,'pembayaran'])->name('profil.pembayaran');
     Route::post('profil/kemaskiniDokumen', [ProfilController::class,'kemaskiniDokumen'])->name('profil.kemaskiniDokumen');
@@ -144,6 +144,8 @@ Route::get('pembaharuan/cash/{encid}', [PembaharuanController::class,'cash'])->n
 Route::get('permohonan', [PermohonanController::class,'index'])->name('permohonan.index');
 Route::post('permohonan/ajaxloadpermohonan', [PermohonanController::class,'ajaxloadpermohonan'])->name('permohonan.ajaxloadpermohonan');
 Route::get('permohonan/checkPermohonan', [PermohonanController::class,'checkPermohonan'])->name('permohonan.checkPermohonan');
+Route::get('permohonan/create', [PermohonanController::class,'create'])->name('permohonan.create');
+Route::post('permohonan/adm/store', [PermohonanController::class,'storeadm'])->name('permohonan.storeadm');
 
 
 Route::get('carian', [KeahlianController::class,'carian'])->name('carian.index');

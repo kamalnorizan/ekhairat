@@ -39,10 +39,14 @@ class KeahlianController extends Controller
         $keahlian = Keahlian::with('bayaranDetails','bayaranDetailsPaid')->select('nama','statusahli','nokp','alamat','id');
 
         if ($request->has('status')) {
-            if($request->status != null && $request->status == 'Aktif'){
-                $keahlian->where('statusahli',1);
+            if($request->status == 'Aktif'){
+                $keahlian->whereHas('bayaranDetailsPaid',function($q){
+                    $q->where('jenis','yuran')->where('tahun',date('Y'));
+                });
             }else{
-                $keahlian->where('statusahli',5);
+                $keahlian->whereDoesntHave('bayaranDetailsPaid',function($q){
+                    $q->where('jenis','yuran')->whereIn('tahun',[date('Y'), date('Y')+1]);
+                });
             }
         }
 
@@ -61,7 +65,7 @@ class KeahlianController extends Controller
             return strtoupper($keahlian->nama);
         })
         ->addColumn('statusAhli', function (Keahlian $keahlian) {
-            return $keahlian->statusahli == 1 ? '<span class="badge badge-success">AKTIF</span>'
+            return $keahlian->bayaranDetailsPaid->where('jenis','yuran')->where('tahun',date('Y'))->count() == 1 ? '<span class="badge badge-success">AKTIF</span>'
              : '<span class="badge badge-danger">TIDAK AKTIF</span>';
         })
         ->addColumn('nokp', function (Keahlian $keahlian) {
