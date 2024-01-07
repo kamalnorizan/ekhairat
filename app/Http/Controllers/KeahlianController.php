@@ -43,7 +43,7 @@ class KeahlianController extends Controller
                 $keahlian->whereHas('bayaranDetailsPaid',function($q){
                     $q->where('jenis','yuran')->where('tahun',date('Y'));
                 });
-            }else{
+            }elseif($request->status == 'Tidak Aktif'){
                 $keahlian->whereDoesntHave('bayaranDetailsPaid',function($q){
                     $q->where('jenis','yuran')->whereIn('tahun',[date('Y'), date('Y')+1]);
                 });

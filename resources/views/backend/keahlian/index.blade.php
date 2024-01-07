@@ -16,7 +16,7 @@
                     <div class="col-md-4">
                         <div class="form-group{{ $errors->has('status') ? ' has-error' : '' }} form-group-default ">
                             {!! Form::label('status', 'Status') !!}
-                            {!! Form::select('status',['Aktif'=>'Aktif','Tidak Aktif'=>'Tidak Aktif'], 'Aktif', ['id' => 'status', 'class' => 'form-control', 'required' => 'required']) !!}
+                            {!! Form::select('status',[''=>'Pilih Status Keahlian','Aktif'=>'Aktif','Tidak Aktif'=>'Tidak Aktif'], '', ['id' => 'status', 'class' => 'form-control', 'required' => 'required']) !!}
                             <small class="text-danger">{{ $errors->first('status') }}</small>
                         </div>
                     </div>
@@ -84,7 +84,8 @@
         allowClear: true
     });
     $('#jenis').select2({
-        placeholder: 'Pilih Jenis Keahlian'
+        placeholder: 'Pilih Jenis Keahlian',
+        allowClear: true
     });
 
     var tableAhli = $('#tableAhli').DataTable({
