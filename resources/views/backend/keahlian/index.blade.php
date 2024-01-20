@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('head')
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap4.min.css">
 @endsection
 
 @section('breadcrumb')
@@ -74,6 +75,14 @@
 @endsection
 
 @section('script')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
 <script>
     $('#status').select2({
         placeholder: 'Sila Pilih Status',
@@ -89,6 +98,8 @@
     });
 
     var tableAhli = $('#tableAhli').DataTable({
+        dom: 'Bfrtip',
+        buttons: ['copy', 'csv', 'excel', 'pdf', 'print'],
         "processing": true,
         "serverSide": true,
         "responsive": true,
