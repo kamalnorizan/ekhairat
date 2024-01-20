@@ -98,7 +98,9 @@
     });
 
     var tableAhli = $('#tableAhli').DataTable({
-        dom: 'Bfrtip',
+        dom: 'lBfrtip',
+        lengthMenu: [[25, 100, -1], [25, 100, "All"]],
+        pageLength: 25,
         "buttons": [{
                "extend": 'copy',
                "text": '<i class="fa fa-files-o" style="color: green;"></i>',
