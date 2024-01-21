@@ -15,7 +15,7 @@
 @section('content')
     <div class="row">
         <div class="col-md-12">
-            <h5>Senarai Ahli Mengikut Kategori</h5>
+            <h5>Senarai Ahli Mengikut Kategoris</h5>
         </div>
         <div class="col-xl-3 col-sm-6 col-12">
             <div class="card cardDiv" data-type="ahliBiasa" style="border-bottom: 10px solid #45289c">
