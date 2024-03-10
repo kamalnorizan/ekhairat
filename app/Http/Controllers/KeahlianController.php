@@ -618,7 +618,7 @@ class KeahlianController extends Controller
 
     function deleteKeahlian(Request $request){
         $keahlian = Keahlian::find(Crypt::decrypt($request->id));
-        $keahlian->forceDelete();
+        $keahlian->delete();
         return response()->json(['status'=>'success']);
     }
 
