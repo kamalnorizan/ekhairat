@@ -152,7 +152,7 @@
                                 <i class="fa fa-check-circle fa-5x font-large-2 float-left" style="color: rgb(63, 191, 146)"></i>
                             </div>
                             <div class="media-body text-right">
-                                <h3>{{ $totalActive->where('tahun',date('Y')+2)->first()->jumlah }}</h3>
+                                <h3>{{ $totalActive->where('tahun',date('Y')+2)->first() ? $totalActive->where('tahun',date('Y')+2)->first()->jumlah : '0' }}</h3>
                                 <span>AHLI AKTIF {{ date('Y')+2 }}</span>
                             </div>
                         </div>

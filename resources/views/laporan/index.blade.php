@@ -176,6 +176,7 @@
     var tblBayaran = $('#tblBayaran').DataTable({
         "processing": true,
         "serverSide": true,
+        "responsive": true,
         "bFilter": false,
         "ajax":{
           "url": "{{ route('laporan.ajaxLoadLaporan') }}",

@@ -56,7 +56,7 @@
                             <td align="center">
                                 {{ $penerima->nokpmeninggal != '' ? $penerima->nokpmeninggal : 'N/A' }}
                             </td>
-                            <td>
+                            <td data-order="{{\Carbon\Carbon::parse($penerima->tarikhmeninggal)->getTimestamp()}}">
                                 {{\Carbon\Carbon::parse($penerima->tarikhmeninggal)->format('d-m-Y')}}
                             </td>
                             <td>
@@ -104,6 +104,13 @@
                             {!! Form::text('nokp', null, ['class' => 'form-control', 'required' => 'required']) !!}
                             <small class="text-danger">{{ $errors->first('nokp') }}</small>
                         </div>
+                        <div class="col-md-12">
+                            <div class="form-group{{ $errors->has('tarikhmeninggal') ? ' has-error' : '' }} form-group-default ">
+                                {!! Form::label('tarikhmeninggal', 'Tarikh Meninggal') !!}
+                                {!! Form::date('tarikhmeninggal', null, ['class' => 'form-control', 'required' => 'required']) !!}
+                                <small class="text-danger">{{ $errors->first('tarikhmeninggal') }}</small>
+                            </div>
+                        </div>
                         <button id="btnSemak" type="button" class="btn btn-block btn-primary" >Semak</button>
                     </div>
                 </div>
@@ -120,13 +127,7 @@
                             <small class="text-danger">{{ $errors->first('nama') }}</small>
                         </div>
                     </div>
-                    <div class="col-md-12">
-                        <div class="form-group{{ $errors->has('tarikhmeninggal') ? ' has-error' : '' }} form-group-default ">
-                            {!! Form::label('tarikhmeninggal', 'Tarikh Meninggal') !!}
-                            {!! Form::date('tarikhmeninggal', null, ['class' => 'form-control', 'required' => 'required']) !!}
-                            <small class="text-danger">{{ $errors->first('tarikhmeninggal') }}</small>
-                        </div>
-                    </div>
+
                     <div class="col-md-12">
                         <div class="form-group{{ $errors->has('kubur') ? ' has-error' : '' }} form-group-default ">
                             {!! Form::label('kubur', 'Tanah Perkuburan') !!}
@@ -171,6 +172,7 @@
 @section('script')
 <script>
     $('#tablePenerima').DataTable({
+        "responsive": true,
         "order": [[ 0, "asc" ]]
     });
 
@@ -201,12 +203,18 @@
 
 
     $('#btnSemak').click(function (e) {
-
-
+        $('#nokp').closest('.form-group').removeClass('has-error');
+        $('#nokp').closest('.form-group').find('.text-danger').text('');
+        $('#tarikhmeninggal').closest('.form-group').removeClass('has-error');
+        $('#tarikhmeninggal').closest('.form-group').find('.text-danger').text('');
         var nokp=$('#nokp').val();
-        if($('#nokp').val() == ''){
+        if($('#nokp').val() == '' ){
             $('#nokp').closest('.form-group').addClass('has-error');
             $('#nokp').closest('.form-group').find('.text-danger').text('Sila masukkan No Kad Pengenalan');
+            return false;
+        }else if($('#tarikhmeninggal').val() == '' ){
+            $('#tarikhmeninggal').closest('.form-group').addClass('has-error');
+            $('#tarikhmeninggal').closest('.form-group').find('.text-danger').text('Sila masukkan Tarikh Meninggal');
             return false;
         }else{
             $('#nokp').closest('.form-group').removeClass('has-error');
@@ -216,41 +224,65 @@
                 url: "{{route('penerima.semak')}}",
                 data: {
                     _token: '{{ csrf_token() }}',
-                    nokp: $('#nokp').val()
+                    nokp: $('#nokp').val(),
+                    tarikhMeninggal : $('#tarikhmeninggal').val()
                 },
                 dataType: "json",
                 success: function (response) {
+                    $('#nokpketua').val('');
+                    $('#nama').val('');
+                    $('#kodpengguna').val('');
+                    $('#hubungan').val('');
+                    $('#keahlian').empty();
+                    $('#jenis').empty();
                     $('#borangKematian').removeClass('d-none');
-                    if (response.status=='success') {
-                        if (response.type=='ketua') {
-                            $('#nokpketua').val(response.keahlian.nokp);
-                            $('#nama').val(response.keahlian.nama);
-                            $('#kodpengguna').val(response.keahlian.kodpengguna);
-                            $('#hubungan').val('Ketua Keluarga');
-                            $('#keahlian').html('<span class="badge badge-success">Ahli</span>');
-                            $('#jenis').html('<span class="badge badge-info">Ketua Keluarga</span>');
-                        } else if(response.type=='pasangan') {
-                            $('#nokpketua').val(response.keahlian.nokp);
-                            $('#nama').val(response.keahlian.namapasangan);
-                            $('#kodpengguna').val(response.keahlian.kodpengguna);
-                            $('#hubungan').val('Pasangan');
-                            $('#keahlian').html('<span class="badge badge-success">Ahli</span>');
-                            $('#jenis').html('<span class="badge badge-info">Pasangan</span>');
-                        } else if(response.type=='tanggungan') {
-                            $('#nokpketua').val(response.tanggungan.ketua.nokp);
-                            $('#nama').val(response.tanggungan.nama);
-                            $('#kodpengguna').val(response.tanggungan.ketua.kodpengguna);
-                            $('#hubungan').val('Tanggungan');
-                            $('#keahlian').html('<span class="badge badge-success">Ahli</span>');
-                            $('#jenis').html('<span class="badge badge-info">Tanggungan</span>');
+                    if (response.status=='success' ) {
+                        if(response.status_aktif == 'true'){
+                            if (response.type=='ketua') {
+                                $('#nokpketua').val(response.keahlian.nokp);
+                                $('#nama').val(response.keahlian.nama);
+                                $('#kodpengguna').val(response.keahlian.kodpengguna);
+                                $('#hubungan').val('Ketua Keluarga');
+                                $('#keahlian').html('<span class="badge badge-success">Ahli</span>');
+                                $('#jenis').html('<span class="badge badge-info">Ketua Keluarga</span>');
+                            } else if(response.type=='pasangan') {
+                                $('#nokpketua').val(response.keahlian.nokp);
+                                $('#nama').val(response.keahlian.namapasangan);
+                                $('#kodpengguna').val(response.keahlian.kodpengguna);
+                                $('#hubungan').val('Pasangan');
+                                $('#keahlian').html('<span class="badge badge-success">Ahli</span>');
+                                $('#jenis').html('<span class="badge badge-info">Pasangan</span>');
+                            } else if(response.type=='tanggungan') {
+                                $('#nokpketua').val(response.tanggungan.ketua.nokp);
+                                $('#nama').val(response.tanggungan.nama);
+                                $('#kodpengguna').val(response.tanggungan.ketua.kodpengguna);
+                                $('#hubungan').val('Tanggungan');
+                                $('#keahlian').html('<span class="badge badge-success">Ahli</span>');
+                                $('#jenis').html('<span class="badge badge-info">Tanggungan</span>');
+                            }
+                        }else{
+
+                            $('#nokpketua').val('');
+                            $('#kodpengguna').val('');
+                            $('#hubungan').val('');
+                            $('#keahlian').html('<span class="badge badge-warning text-black">Bukan Ahli</span>');
+                            $('#jenis').empty();
+                            $('#nokp').val(nokp);
+                            if (response.type=='ketua') {
+                                $('#nama').val(response.keahlian.nama);
+                            } else if(response.type=='pasangan') {
+                                $('#nama').val(response.keahlian.namapasangan);
+                            } else if(response.type=='tanggungan') {
+                                $('#nama').val(response.tanggungan.nama);
+                            }
                         }
                     }else{
-                        $('#formPenerima')[0].reset();
+
                         $('#nokpketua').val('');
                         $('#kodpengguna').val('');
                         $('#hubungan').val('');
 
-                        $('#keahlian').html('<span class="badge badge-warning">Bukan Ahli</span>');
+                        $('#keahlian').html('<span class="badge badge-warning text-black">Bukan Ahli</span>');
                         $('#jenis').empty();
                         $('#nokp').val(nokp);
                     }

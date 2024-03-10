@@ -46,7 +46,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse ($bayaran as $bayar)
+                        {{-- @forelse ($bayaran as $bayar)
                         <tr>
                             <td>
                                 {{ $bayar->keahlian->nama }}
@@ -64,7 +64,11 @@
                                 {{ $bayar->keahlian->alamat }}
                             </td>
                             <td>
+
                                 <a href="{{ route('profil.index', Crypt::encrypt($bayar->keahlian->id)) }}" class="btn btn-sm btn-primary">Perincian</a>
+                                @can('access-systemadmin')
+                                <button type="button" data-id="{{$bayar->id}}" class="btn btn-sm btn-danger btn-del">Padam</button>
+                                @endcan
                             </td>
                         </tr>
                         @empty
@@ -73,7 +77,7 @@
                                 <span class="text-muted">Tiada permohonan baharu setakat ini</span>
                             </td>
                         </tr>
-                        @endforelse
+                        @endforelse --}}
                     </tbody>
                 </table>
                 {{-- {{Auth::user()->kodstatuspengguna}} --}}
@@ -85,11 +89,78 @@
 
 @section('script')
 <script>
-    @if ($bayaran->count()>0)
-        $('#mytable').DataTable({
-            "order": [[ 0, "asc" ]]
+    var table = $('#mytable').DataTable({
+            "processing": true,
+            "serverSide": true,
+            "responsive": true,
+            "ajax": {
+                "method": 'POST', // Type of response and matches what we said in the route
+                "url": "{{ route('pembaharuan.ajaxloadpembaharuan') }}",
+                "dataType": "json",
+                "data": {
+                    _token: "{{ csrf_token() }}"
+                }
+            },
+            "columns": [{
+                    "data": "nama"
+                },
+                {
+                    "data": "nokp"
+                },
+                {
+                    "data": "umur"
+                },
+                {
+                    "data": "tarikhlahir"
+                },
+                {
+                    "data": "alamat"
+                },
+                {
+                    "data": "tindakan"
+                }
+            ]
         });
-    @endif
+
+    $(document).on("click", ".btn-del", function(e) {
+        e.preventDefault();
+        var id = $(this).data('id');
+       swal({
+           title: "Adakah anda pasti?",
+           text: "Tindakan anda akan memadam rekod pembayaran/permohonan dari pengguna!",
+           icon: "warning",
+           buttons: {cancel: {
+               text: "Batal",
+               value: null,
+               visible: true,
+               className: "",
+               closeModal: true,
+           },
+           confirm: {
+               text: "Ya, saya pasti.",
+               value: true,
+               visible: true,
+               className: "btn-danger",
+               closeModal: true
+           }}
+       }).then((value)=>{
+           if(value==true){
+               $.ajax({
+                   type: "post",
+                   url: "{{route('pembaharuan.delete')}}",
+                   data: {
+                       _token: '{{csrf_token()}}',
+                       id: id
+                   },
+                   dataType: "json",
+                   success: function (response) {
+                        table.ajax.reload();
+                       swal("Berjaya!", "Rekod pembayaran/permohonan telah berjaya dipadam.", "success");
+                   }
+               });
+           }
+       });
+    });
 </script>
 @endsection
 

@@ -12,6 +12,7 @@ use App\Http\Controllers\PermohonanController;
 use App\Http\Controllers\PembaharuanController;
 use App\Http\Controllers\PenerimaController;
 use App\Http\Controllers\LaporanController;
+use App\Http\Controllers\MaintainanceController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 
@@ -26,41 +27,43 @@ use Illuminate\Support\Facades\Artisan;
 |
 */
 
-// Route::get('/m-artisan', function () {
-//     if( env('CUSTOM_ARTISAN') ){
-//         echo "<form method=post>";
-//         echo "<input type='hidden' name='_token' value='" . csrf_token() . "' />";
-//         echo "<input type='text' name='command' placeholder='Write your artisan command here' />";
-//         echo "<button>Execute</button>";
-//         echo "</form>";
-//         return 'write command without php artisan.';
-//     }else{
-//         return "Naaah... Not Allowed !!";
-//     }
+Route::get('/m-artisan', function () {
+    if( env('CUSTOM_ARTISAN') ){
+        echo "<form method=post>";
+        echo "<input type='hidden' name='_token' value='" . csrf_token() . "' />";
+        echo "<input type='text' name='command' placeholder='Write your artisan command here' />";
+        echo "<button>Execute</button>";
+        echo "</form>";
+        return 'write command without php artisan.';
+    }else{
+        return "Naaah... Not Allowed !!";
+    }
 
-// });
-// Route::post('/m-artisan', function (Request $request) {
-//     if (env('CUSTOM_ARTISAN')) {
-//         echo "<form method=post>";
-//         echo "<input type='hidden' name='_token' value='" . csrf_token() . "' />";
-//         echo "<input type='text' name='command' value='".$request->command."' placeholder='writ your artisan command here' />";
-//         echo "<button>Execute</button>";
-//         echo "</form>";
-//         try {
-//             Artisan::call($request->command);
-//             dump(Artisan::output());
-//         } catch (\Throwable $th) {
-//             echo "Error : ".$th->getMessage();
-//         }
-//     }else{
-//         return 'Naaah... Not Allowed !!';
-//     }
-//     return 'Command executed';
-// });
+});
+Route::post('/m-artisan', function (Request $request) {
+    if (env('CUSTOM_ARTISAN')) {
+        echo "<form method=post>";
+        echo "<input type='hidden' name='_token' value='" . csrf_token() . "' />";
+        echo "<input type='text' name='command' value='".$request->command."' placeholder='writ your artisan command here' />";
+        echo "<button>Execute</button>";
+        echo "</form>";
+        try {
+            Artisan::call($request->command);
+            dump(Artisan::output());
+        } catch (\Throwable $th) {
+            echo "Error : ".$th->getMessage();
+        }
+    }else{
+        return 'Naaah... Not Allowed !!';
+    }
+    return 'Command executed';
+});
 
 Route::middleware(['visitcounter'])->group(function () {
     Route::get('/', [FrontEndController::class,'index'])->name('index');
 });
+
+// Route::get('/maintainance/checkfpx', [MaintainanceController::class,'index'])->name('maintainance.index')->middleware('auth');
 
 Route::post('/checkKeahlian', [FrontEndController::class,'checkKeahlian'])->name('front.checkKeahlian');
 Route::get('/checkKeahlian/{ic}', [FrontEndController::class,'checkKeahlianBe'])->name('front.checkKeahlianBe');
@@ -69,9 +72,13 @@ Route::get('perincian/{encid}', [KeahlianController::class,'perincian'])->name('
 Route::get('pembaharuan/bayaran/{encid}/{type?}', [KeahlianController::class,'pembaharuanbayaran'])->name('keahlian.front.pembaharuanbayaran');
 Route::get('pembaharuan/{encid}/{type?}', [KeahlianController::class,'pembaharuan'])->name('keahlian.front.pembaharuan');
 Route::get('kemaskini/{encid}', [KeahlianController::class,'kemaskini'])->name('keahlian.front.kemaskini');
-Route::get('permohonan', [KeahlianController::class,'permohonan'])->name('keahlian.front.permohonan');
+// Route::get('permohonan', [KeahlianController::class,'permohonan'])->name('keahlian.front.permohonan');
+Route::post('pembaharuan/ajaxloadpembaharuan', [PembaharuanController::class,'ajaxloadpembaharuan'])->name('pembaharuan.ajaxloadpembaharuan');
 Route::post('pembaharuan/pembayaran', [KeahlianController::class,'pembayaran'])->name('keahlian.front.pembayaran');
+Route::post('pembaharuan/delete', [KeahlianController::class,'delete'])->name('pembaharuan.delete');
 Route::post('pembaharuan/{encid}', [KeahlianController::class,'pembaharuanStore'])->name('keahlian.front.pembaharuanStore');
+
+
 
 Route::post('permohonan', [KeahlianController::class,'permohonanStore'])->name('keahlian.front.permohonanStore');
 
@@ -97,18 +104,22 @@ Route::post('home/updatePinAjax', [HomeController::class,'updatePinAjax'])->name
 
 Route::middleware(['auth', 'checkSessionTimeout'])->group(function () {
     Route::get('profil/resit/{encid}', [ProfilController::class,'resit'])->name('profil.resit');
-    Route::get('profil/pembaharuan/{encid}', [ProfilController::class,'pembaharuan'])->name('profil.pembaharuan');
+    Route::get('profil/pembaharuan/{encid}/{type?}', [ProfilController::class,'pembaharuan'])->name('profil.pembaharuan');
     Route::get('profil/{u?}', [ProfilController::class,'index'])->name('profil.index');
     Route::post('profil/pembayaran', [ProfilController::class,'pembayaran'])->name('profil.pembayaran');
+    Route::post('profil/kemaskiniDokumen', [ProfilController::class,'kemaskiniDokumen'])->name('profil.kemaskiniDokumen');
     Route::post('profil/update', [ProfilController::class,'update'])->name('profil.update');
     Route::post('profil/loadPengesahan', [ProfilController::class,'loadPengesahan'])->name('profil.loadPengesahan');
     Route::post('profil/sahkanPembayaran', [ProfilController::class,'sahkanPembayaran'])->name('profil.sahkanPembayaran');
     Route::post('profil/semakPembayaranFpx', [ProfilController::class,'semakPembayaranFpx'])->name('profil.semakPembayaranFpx');
     Route::post('profil/sahkanPembayaranfpx', [ProfilController::class,'sahkanPembayaranfpx'])->name('profil.sahkanPembayaranfpx');
+
 });
+
 
 Route::get('keahlianadm', [KeahlianController::class,'index'])->name('keahlianadm.index');
 Route::post('keahlianadm/ajaxLoadAhli', [KeahlianController::class,'ajaxLoadAhli'])->name('keahlianadm.ajaxLoadAhli');
+Route::post('keahlianadm/deleteKeahlian', [KeahlianController::class,'deleteKeahlian'])->name('keahlianadm.deleteKeahlian');
 
 Route::get('/ketetapan', [KetetapanController::class, 'index'])->name('ketetapan.index');
 Route::post('/ketetapan/updateStatusPembaharuan', [KetetapanController::class, 'updateStatusPembaharuan'])->name('ketetapan.updateStatusPembaharuan');
@@ -128,10 +139,14 @@ Route::get('/smsblast',[SmsblastController::class,'smsblast'])->name('smsblast.i
 Route::get('/sms/processSend/{id}',[SmsblastController::class,'processSend'])->name('smsblast.processSend');
 
 Route::get('pembaharuan', [PembaharuanController::class,'index'])->name('pembaharuan.index');
+
 Route::get('pembaharuan/cash/{encid}', [PembaharuanController::class,'cash'])->name('pembaharuan.cash');
 
 Route::get('permohonan', [PermohonanController::class,'index'])->name('permohonan.index');
+Route::post('permohonan/ajaxloadpermohonan', [PermohonanController::class,'ajaxloadpermohonan'])->name('permohonan.ajaxloadpermohonan');
 Route::get('permohonan/checkPermohonan', [PermohonanController::class,'checkPermohonan'])->name('permohonan.checkPermohonan');
+Route::get('permohonan/create', [PermohonanController::class,'create'])->name('permohonan.create');
+Route::post('permohonan/adm/store', [PermohonanController::class,'storeadm'])->name('permohonan.storeadm');
 
 
 Route::get('carian', [KeahlianController::class,'carian'])->name('carian.index');
@@ -143,3 +158,5 @@ Route::post('penerima/store', [PenerimaController::class,'store'])->name('peneri
 
 Route::get('laporan', [LaporanController::class,'index'])->name('laporan.index');
 Route::get('laporan/ajaxLoadLaporan', [LaporanController::class,'ajaxLoadLaporan'])->name('laporan.ajaxLoadLaporan');
+
+

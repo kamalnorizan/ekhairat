@@ -22,6 +22,7 @@ use GuzzleHttp\Promise;
 use Crypt;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
+
 class ProfilController extends Controller
 {
     function index($u=null) {
@@ -31,6 +32,47 @@ class ProfilController extends Controller
         }else{
             $keahlian = Auth::user()->keahlian;
         }
+        //semak fpx
+        $bayaranFpx = Bayaran::where('nokp',$keahlian->nokp)->where('carabayaran','FPX')->where('statusbayaran','4')->get();
+        foreach($bayaranFpx as $bayaranf) {
+            if($bayaranf->billCode != null || $bayaranf->billCode != ''){
+                $client = new Client();
+                $options = [
+                'multipart' => [
+                    [
+                    'name' => 'billCode',
+                    'contents' => $bayaranf->billCode
+                    ],
+                    [
+                    'name' => 'billpaymentStatus',
+                    'contents' => '1'
+                    ]
+                ]];
+                //post request
+                $promise = $client->postAsync('https://toyyibpay.com/index.php/api/getBillTransactions', $options);
+
+                $promise->then(
+                    function ($response) use ($bayaranf) {
+                        $data = json_decode($response->getBody()->getContents());
+
+                        if($data[0]->billpaymentStatus == '1'){
+                            $noResit = Bayaran::with('keahlian')->where('noresitnew', 'like', '%'.date('Y').'%')->orderBy('noresitnew', 'desc')->first();
+                            $resitNew = substr($noResit->noresitnew,5,4) + 1;
+                            $resitNew = 'R'.date('Y').str_pad($resitNew, 4, '0', STR_PAD_LEFT);
+                            $bayaranf->statusbayaran = '1';
+                            $bayaranf->refnumber = $data[0]->billpaymentInvoiceNo;
+                            $bayaranf->noresitnew = $resitNew;
+                            $bayaranf->save();
+                        }
+                    },
+                    function ($exception) {
+                        echo $exception->getMessage();
+                    }
+                );
+                $promise->wait();
+            }
+        }
+
         $lt_alamat = Alamat::pluck('keterangan','id');
         $tahun = Tahun::all();
         $databayaran = collect();
@@ -50,10 +92,36 @@ class ProfilController extends Controller
             }
         }
 
+
+
         $databayaran=$databayaran->sortBy('tahun');
         $configpendaftaran=Config::where('type','pendaftaran')->first();
         $configtahunsemasa=Config::whereType('tahunsemasa')->first();
         return view('backend.keahlian.profil',compact('type','keahlian','lt_alamat','databayaran','tahun','configpendaftaran','configtahunsemasa'));
+    }
+
+    function kemaskiniDokumen (Request $request) {
+        $validator=Validator::make($request->all(), [
+            'dokumen' => 'required|mimes:jpeg,png,jpg,pdf|max:2048'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $bayaran = Bayaran::find($request->id);
+        $file = $request->file('dokumen');
+        $fileName = Str::random(40).'.'.$file->getClientOriginalExtension();
+        $file->move(public_path('uploads/'.$bayaran->keahlian->nokp.'/'), $fileName);
+        $bayaran->buktibayaran = 'uploads/'.$bayaran->keahlian->nokp.'/'.$fileName;
+        $bayaran->save();
+
+        $data['status'] = 'success';
+        $data['buktibayaran'] = $bayaran->buktibayaran;
+        return response()->json($data, 200);
+
     }
 
     function update(Request $request) {
@@ -130,7 +198,7 @@ class ProfilController extends Controller
 
     }
 
-    function pembaharuan($encid) {
+    function pembaharuan($encid, $type=null) {
         try {
             $id = Crypt::decrypt($encid);
         } catch (\Throwable $th) {
@@ -146,7 +214,8 @@ class ProfilController extends Controller
                 unset($yearsToRenew[$key]);
             }
         }
-        return view('profil.pembaharuan', compact('keahlian','yearsToRenew'));
+
+        return view('profil.pembaharuan', compact('keahlian','yearsToRenew','type'));
     }
 
     function pembayaran(Request $request) {
@@ -158,6 +227,7 @@ class ProfilController extends Controller
             'buktiSumbangan' => 'required_if:caraPembayaran,1|mimes:jpeg,png,jpg,pdf|max:1024'
         ]);
 
+        // dd($request->all());
 
         if ($validator->fails()) {
             return response()->json([
@@ -168,7 +238,7 @@ class ProfilController extends Controller
         $keahlian = Keahlian::where('nokp',$request->nokp)->first();
         $rekodBayaran = Bayaran::where('nobil','like','BIL'.(date('Y')).'%')->orderBy('nobil','desc')->first();
         if($rekodBayaran){
-            $bilNo = substr($rekodBayaran->nobil,8,4)+1;
+            $bilNo = substr($rekodBayaran->nobil,7,4)+1;
             $bil = 'BIL'.date('Y').str_repeat('0',4-strlen($bilNo)).$bilNo;
 
         }else{
@@ -187,14 +257,20 @@ class ProfilController extends Controller
             $fileName = Str::random(40).'.'.$file->getClientOriginalExtension();
             $file->move(public_path('uploads/'.$request->nokp.'/'), $fileName);
             $bayaran->buktibayaran = 'uploads/'.$request->nokp.'/'.$fileName;
-        }
-        if($request->caraPembayaran=='2'){
+        }else if($request->caraPembayaran=='2'){
             $bayaran->carabayaran = 'FPX';
             $bayaran->statusbayaran = '0';
-        }
-        if($request->caraPembayaran=='3'){
+        }else if($request->caraPembayaran=='3'){
             $bayaran->carabayaran = 'TUNAI';
             $bayaran->statusbayaran = '0';
+        }else if($request->caraPembayaran=='4'){
+            $bayaran->carabayaran = 'TAJAAN';
+            $bayaran->statusbayaran = '1';
+            $bayaran->jumlahbayaran = '0';
+        }else if($request->caraPembayaran=='5'){
+            $bayaran->carabayaran = 'TAJAAN';
+            $bayaran->statusbayaran = '1';
+            $bayaran->jumlahbayaran = '0';
         }
 
         if($request->has('pengesahanSemak')){
@@ -215,7 +291,13 @@ class ProfilController extends Controller
                 $bayaranDetail->jenis = 'yuran';
                 $bayaranDetail->tahun = $value;
                 $bayaranDetail->bayaran_id = $bayaran->id;
-                $bayaranDetail->amaun = 50.00;
+                if($request->caraPembayaran=='4'){
+                    $bayaranDetail->amaun = 0.00;
+                }elseif($request->caraPembayaran=='5'){
+                    $bayaranDetail->amaun = 0.00;
+                }else{
+                    $bayaranDetail->amaun = 50.00;
+                }
                 $bayaranDetail->save();
             }
         }
@@ -229,6 +311,7 @@ class ProfilController extends Controller
             $bayaranDetail->amaun = $request->derma;
             $bayaranDetail->save();
         }
+
         if($request->caraPembayaran=='2'){
             $tajuk='';
             foreach ($bayaran->bayaranDetails->where('jenis','yuran') as $key => $value) {
@@ -278,42 +361,45 @@ class ProfilController extends Controller
 
         if($request->has('pengesahanSemak')){
             $phoneNumber = $bayaran->keahlian->notel_hp;
+
             if ($phoneNumber!=null && $phoneNumber!='') {
                 $phoneNumber= str_replace(' ', '', $phoneNumber);
                 $phoneNumber= str_replace('-', '', $phoneNumber);
                 if(substr($phoneNumber, 0, 1) == '0'){
                     $phoneNumber = '6'.$phoneNumber;
                 }
-                if($this->isStringAllNumbers($phoneNumber)){
-                    $mesej = 'Pembayaran anda sebanyak RM '.$bayaran->jumlahbayaran.' telah disahkan. No resit anda adalah '.$bayaran->noresitnew.'. Sila cetak resit anda di sistem ekhairat';
-                    $smsBlast = new Smsblast;
-                    $smsBlast->msg = $mesej;
-                    $smsBlast->dateToBlast = date('Y-m-d');
-                    $smsBlast->status = 'pending';
-                    $smsBlast->msgCode = Str::random(14);
-                    $smsBlast->created_by = Auth::user()->id;
-                    $smsBlast->save();
+                if($request->caraPembayaran=='1' || $request->caraPembayaran=='2' || $request->caraPembayaran=='3'){
+                    if($this->isStringAllNumbers($phoneNumber)){
+                        $mesej = 'Pembayaran anda sebanyak RM '.$bayaran->jumlahbayaran.' telah disahkan. No resit anda adalah '.$bayaran->noresitnew.'. Sila cetak resit anda di sistem ekhairat';
+                        $smsBlast = new Smsblast;
+                        $smsBlast->msg = $mesej;
+                        $smsBlast->dateToBlast = date('Y-m-d');
+                        $smsBlast->status = 'pending';
+                        $smsBlast->msgCode = Str::random(14);
+                        $smsBlast->created_by = Auth::user()->id;
+                        $smsBlast->save();
 
-                    $customRreferenceId = Str::random(6);
-                    $smsblastGroup = new SmsblastGroup;
-                    $smsblastGroup->smsblast_id = $smsBlast->id;
-                    $smsblastGroup->customRreferenceId = $customRreferenceId;
-                    $smsblastGroup->status = 'pending';
-                    $smsblastGroup->save();
+                        $customRreferenceId = Str::random(6);
+                        $smsblastGroup = new SmsblastGroup;
+                        $smsblastGroup->smsblast_id = $smsBlast->id;
+                        $smsblastGroup->customRreferenceId = $customRreferenceId;
+                        $smsblastGroup->status = 'pending';
+                        $smsblastGroup->save();
 
-                    $smsblastDetail = new SmsblastDetail;
-                    $smsblastDetail->smsblast_id = $smsBlast->id;
-                    $smsblastDetail->smsblast_group_id = $smsblastGroup->id;
-                    $phoneNumber= str_replace(' ', '', $phoneNumber);
-                    $phoneNumber= str_replace('-', '', $phoneNumber);
-                    if(substr($phoneNumber, 0, 1) == '0'){
-                        $phoneNumber = '6'.$phoneNumber;
+                        $smsblastDetail = new SmsblastDetail;
+                        $smsblastDetail->smsblast_id = $smsBlast->id;
+                        $smsblastDetail->smsblast_group_id = $smsblastGroup->id;
+                        $phoneNumber= str_replace(' ', '', $phoneNumber);
+                        $phoneNumber= str_replace('-', '', $phoneNumber);
+                        if(substr($phoneNumber, 0, 1) == '0'){
+                            $phoneNumber = '6'.$phoneNumber;
+                        }
+                        $smsblastDetail->phoneNumber = $phoneNumber;
+                        $smsblastDetail->status = 'pending';
+                        $smsblastDetail->save();
+
+                        dispatch(new SendSMS($smsBlast->smsBlastGroups->first()->id));
                     }
-                    $smsblastDetail->phoneNumber = $phoneNumber;
-                    $smsblastDetail->status = 'pending';
-                    $smsblastDetail->save();
-
-                    dispatch(new SendSMS($smsBlast->smsBlastGroups->first()->id));
                 }
             }
         }
@@ -392,7 +478,7 @@ class ProfilController extends Controller
 
         return response()->json(['message' => 'Berjaya disahkan'], 200);
     }
-    
+
     function sahkanPembayaranfpx(Request $request){
         $bayaran = Bayaran::find($request->id);
         $noResit = Bayaran::with('keahlian')->where('noresitnew', 'like', '%'.date('Y').'%')->orderBy('noresitnew', 'desc')->first();
@@ -451,21 +537,21 @@ class ProfilController extends Controller
     function isStringAllNumbers($str) {
         return preg_match('/^[0-9]+$/', $str) === 1;
     }
-    
+
     function semakPembayaranFpx(Request $request){
         $some_data = array(
             'billCode' => $request->kodFpx
-          );  
-        
+          );
+
           $curl = curl_init();
-        
+
           curl_setopt($curl, CURLOPT_POST, 1);
-          curl_setopt($curl, CURLOPT_URL, 'https://toyyibpay.com/index.php/api/getBillTransactions');  
+          curl_setopt($curl, CURLOPT_URL, 'https://toyyibpay.com/index.php/api/getBillTransactions');
           curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
           curl_setopt($curl, CURLOPT_POSTFIELDS, $some_data);
-        
+
           $result = curl_exec($curl);
-          $info = curl_getinfo($curl);  
+          $info = curl_getinfo($curl);
           curl_close($curl);
             $data = json_decode($result);
           return response()->json($data, 200);

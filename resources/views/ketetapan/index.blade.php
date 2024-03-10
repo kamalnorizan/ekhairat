@@ -13,7 +13,7 @@
     .dropdown-item{
         cursor: pointer;
     }
-    
+
     .table{
         width: 100%!important;
     }
@@ -235,6 +235,7 @@
         var tblPengguna = $('#tablePengguna').DataTable({
             "processing": true,
             "serverSide": true,
+            "responsive": true,
             "ajax":{
                 "method":"POST",
                 "url": "{{ route('ketetapan.ajaxLoadPengguna') }}",
@@ -304,6 +305,7 @@
         var tblTajaan = $('#tblTajaan').DataTable({
             "processing": true,
             "serverSide": true,
+            "responsive": true,
             "ajax":{
                 "method":"POST",
                 "url": "{{ route('ketetapan.ajaxLoadTajaan') }}",

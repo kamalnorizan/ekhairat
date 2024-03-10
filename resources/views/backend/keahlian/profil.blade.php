@@ -331,6 +331,10 @@
                                         <button class="btn btn-lg btn-primary btnPembayaran"  type="button" data-type='kemaskini'>Kemaskini Maklumat Keahlian</button>
                                         @if ($configpendaftaran->value==1)
                                         <button class="btn btn-lg btn-success btnPembayaran" data-type='pembaharuan'>Pembaharuan Sesi {{$configtahunsemasa->value}}</button>
+                                        @else
+                                            @canany(['access-systemadmin','access-admin','access-superadmin'])
+                                            <button class="btn btn-lg btn-success btnPembayaran" data-type='pembaharuan'>Pembaharuan Sesi {{$configtahunsemasa->value}}</button>
+                                            @endcanany
                                         @endif
                                     </div>
                                 </div>
@@ -498,6 +502,11 @@
                 <div class="row">
                     <div class="col-md-12">
                         <iframe style="align-content: center" src="" width="100%" height="350px" frameborder="0" id="iframeBukti"></iframe>
+                        <br>
+                        @can('access-systemadmin')<button type="button" class="btn btn-primary btn-sm float-right" data-toggle="modal" data-target="#kemaskiniAttachment">
+                            Kemaskini Lampiran
+                          </button>@endcan
+
                     </div>
                     <div class="col-md-12">
                         <div class="card card-bordered" >
@@ -521,6 +530,35 @@
     </div>
 </div>
 
+<!-- Button trigger modal -->
+
+<!-- Modal -->
+@can('access-systemadmin')
+<div class="modal fade  slide-right" id="kemaskiniAttachment" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Kemaskini Lampiran</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group{{ $errors->has('dokumen') ? ' has-error' : '' }} form-group-default ">
+                    {!! Form::label('dokumen', 'Dokumen') !!}
+                    {!! Form::file('dokumen', ['required' => 'required']) !!}
+                    <p class="help-pgock">Sila muatnaik resit pembayaran untuk mengemaskini resit pembayaran yang telah dihantar</p>
+                    <small class="text-danger">{{ $errors->first('dokumen') }}</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                <button type="button" id="btnUploadResit"  class="btn btn-primary">Simpan</button>
+            </div>
+        </div>
+    </div>
+</div>
+@endcan
 <div class="modal fade slide-right" id="semakFpxModal" tabindex="-1"  role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -637,8 +675,40 @@
             });
         }
     });
-    
-    
+
+    $('#btnUploadResit').click(function (e) {
+        e.preventDefault();
+        var formData = new FormData();
+        var fileInput = $('#dokumen')[0].files[0];
+
+        formData.append('dokumen', fileInput);
+        formData.append('id', $('#idBayaranPengesahan').val());
+        formData.append('_token', '{{ csrf_token() }}');
+        $.ajax({
+            url: '{{route("profil.kemaskiniDokumen")}}', // replace with your Laravel route
+            method: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function (response) {
+                $('#iframeBukti').attr('src', '{{ asset('/') }}'+response.buktibayaran);
+                swal({
+                  title: "Berjaya",
+                  text: "Maklumat pembayaran telah berjaya dikemaskini",
+                  icon: "success",
+                });
+                $('#kemaskiniAttachment').modal('hide');
+            },
+            error: function (error) {
+                $.each(error.responseJSON.errors, function (indexInArray, valueOfElement) {
+                    $('#'+indexInArray).closest('.form-group').addClass('has-error');
+                    $('#'+indexInArray).closest('.form-group').find('.text-danger').text(valueOfElement[0]);
+                });
+                console.error();
+            }
+        });
+    });
+
     $('#btnSahkan').click(function (e) {
         e.preventDefault();
         swal("Adakah anda pasti untuk mengesahkan maklumat pembayaran ini?",{
@@ -772,6 +842,11 @@
         if (s.length == 9) {
             $(this).val(s + "-");
         }
+    });
+
+    $('.semakbayaranfpx').click(function (e) {
+        e.preventDefault();
+        alert('test');
     });
 
     function loadTanggungan() {

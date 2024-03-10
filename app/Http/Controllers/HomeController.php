@@ -25,29 +25,37 @@ class HomeController extends Controller
 
     public function index()
     {
-        $ahli = StatusPengguna::where('kodstatuspengguna','21')->withCount('ahli')->first();
+        $ahli = StatusPengguna::withCount(['ahli'=>function($q){
+            $q->whereHas('bayaranDetailsPaid',function($q2){
+                $q2->where('jenis','yuran')->where('tahun','2024');
+            });
+        }])->where('kodstatuspengguna','21')->first();
         $ajk = StatusPengguna::whereNotIn('kodstatuspengguna',['21','20'])->withCount('ahli')->get();
         $asnaf = StatusPengguna::where('kodstatuspengguna','20')->withCount('ahli')->first();
-        $keseluruhan = StatusPengguna::withCount('ahli')->get();
+
+
 
         $totalActive = BayaranDetail::selectRaw('tahun, count(*) as jumlah')->where('jenis','yuran')->whereHas('bayaran',function($q){
             $q->where('statusbayaran','1');
         })->where('tahun','>=',date('Y'))->groupBy('tahun')->get();
 
+        // dd($totalActive);
         $ahlibaru = Bayaran::where('jenisPermohonan',2)->whereYear('kelulusanbayaran_pada','2023')->whereMonth('kelulusanbayaran_pada','>=',8)->count(); ;
 
-        $countKeseluruhan = 0;
-        foreach ($keseluruhan as $key => $seluruh) {
-            $countKeseluruhan = $countKeseluruhan+$seluruh->ahli_count;
+        $totalAjk = 0;
+        foreach ($ajk as $key => $value) {
+           $totalAjk = $totalAjk+$value->ahli_count;
         }
-        $countJawatan = 0;
-        foreach ($ajk as $key => $jawatan) {
-            $countJawatan = $countJawatan+$jawatan->ahli_count;
-        }
+        $countKeseluruhan = $ahli->ahli_count+$asnaf->ahli_count+$totalAjk;
+        $countJawatan = $totalAjk;
 
-        $alamat = Alamat::with('ahli')->withCount('ahli')->get();
-        // dd($alamat);
-        return view('dashboard.index',compact('ahli','ajk','asnaf','keseluruhan','countKeseluruhan','countJawatan','alamat','totalActive','ahlibaru'));
+        $alamat = Alamat::withCount(['ahli'=>function($q){
+            $q->whereHas('bayaranDetailsPaid',function($q2){
+                $q2->where('jenis','yuran')->where('tahun','2024');
+            });
+        }])->get(); ;
+
+        return view('dashboard.index',compact('ahli','ajk','asnaf','countKeseluruhan','countJawatan','alamat','totalActive','ahlibaru'));
     }
 
     function checkuser() {
@@ -135,7 +143,7 @@ class HomeController extends Controller
                         if($data['jumlahbayaran'] - $data['derma'] > $data['bayaran']){
                             $rekodBayaran = Bayaran::where('nobil','like','BIL'.($data['tahun']).'%')->orderBy('nobil','desc')->first();
                             if($rekodBayaran){
-                                $bilNo = substr($rekodBayaran->nobil,8,4)+1;
+                                $bilNo = substr($rekodBayaran->nobil,7,4)+1;
                                 $bil = 'BIL'.$data['tahun'].str_repeat('0',4-strlen($bilNo)).$bilNo;
 
                             }else{
@@ -227,7 +235,7 @@ class HomeController extends Controller
                         }else{
                             $rekodBayaran = Bayaran::where('nobil','like','BIL'.($data['tahun']).'%')->orderBy('nobil','desc')->first();
                             if($rekodBayaran){
-                                $bilNo = substr($rekodBayaran->nobil,8,4)+1;
+                                $bilNo = substr($rekodBayaran->nobil,7,4)+1;
                                 $bil = 'BIL'.$data['tahun'].str_repeat('0',4-strlen($bilNo)).$bilNo;
 
                             }else{

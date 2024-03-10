@@ -5,11 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-
-class Bayaran extends Model
+use OwenIt\Auditing\Contracts\Auditable;
+class Bayaran extends Model  implements Auditable
 {
     use SoftDeletes;
     public $timestamps = true;
+    use \OwenIt\Auditing\Auditable;
 
     protected $table = 'tblbayaran';
 

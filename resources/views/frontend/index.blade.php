@@ -42,7 +42,7 @@
         color: #1c87c9;
         transition: 0.4s;
     }
-    
+
     dl, dt, dd, ol, ul, li {
         margin: 5px;
         padding: 2px;
@@ -184,7 +184,7 @@
                         <li>Kaedah pendaftaran dan bayaran secara ONLINE @ atas talian yang dibuat sendiri oleh ahli telah pun di laksanakan sejak tahun 2021 akibat pandemik Covid.19 dan akan terus digunakan pada masa akan datang.</li>
                     </ul>
                     <button type="button"  data-toggle="modal" data-target="#memo2023" class="btn btn-lg btn-warning"> Klik di sini untuk Syarat Keahlian Lengkap</button>
-                        
+
                 </div>
 
                 <div class="col-lg-6 align-self-end">
@@ -327,7 +327,7 @@
                         {!! Form::text('nokp', null, ['class' => 'form-control', 'required' => 'required']) !!}
                         <small class="text-danger">{{ $errors->first('nokp') }}</small>
                     </div>
-                    
+
                     <div class="g-recaptcha" id="g-recaptcha" data-sitekey="6LdoP6EnAAAAAJLBQhIFMxXCgd6IUIzSGg0xaoXJ"></div>
                     <button id="buttonCheck" class="btn btn-success  float-end">Semak</button>
                 </div>
@@ -507,6 +507,7 @@
 </div>
 @endsection
 @section('script')
+<script type="text/javascript" src="{{ asset('res/assets/plugins/jquery-inputmask/jquery.inputmask.min.js') }}"></script>
 <script>
 	var blink = document.getElementById('blink');
 	setInterval(function() {
@@ -518,21 +519,14 @@
         $('#menuSemakKeahlian').click();
     });
 
-	$("#nokp").keyup(function(){
-		var s= $("#nokp").val();
-		if(s.length == 6){
-			$("#nokp").val(s+"-");
-		}
-
-		if(s.length == 9){
-			$("#nokp").val(s+"-");
-		}
-	});
+    $(function ($) {
+        $("#nokp").mask("999999-99-9999");
+    });
 
     $('#buttonCheck').click(function (e) {
         e.preventDefault();
         var recaptchaValue = grecaptcha.getResponse();
-        
+
         if($("#nokp").val() == ''){
             $('#nokp').addClass('error');
             $('#nokp').closest('.form-group').find('.text-danger').text('Sila masukkan No. Kad Pengenalan');

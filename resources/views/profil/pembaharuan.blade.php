@@ -9,7 +9,11 @@
 @endsection
 
 @section('breadcrumb')
-<li class="breadcrumb-item"><a href="#">Pembaharuan</a></li>
+<li class="breadcrumb-item"><a href="#">@if ($type=='n')
+    Pendaftaran
+@else
+    Pembaharuan
+@endif</a></li>
 @endsection
 
 @section('actions')
@@ -36,6 +40,8 @@
                                     <option value="2">FPX</option>
                                     @can('access-admin')
                                     <option value="3">TUNAI</option>
+                                    <option value="4">TAJAAN ASNAF</option>
+                                    <option value="5">TAJAAN AJK</option>
                                     @endcan
                                 </select>
                                 <small class="text-danger"></small>
@@ -120,13 +126,14 @@
 <script>
     $('#caraPembayaran').change(function (e) {
         e.preventDefault();
-        if($(this).val()!=2){
+        if($(this).val()==1 || $(this).val()==3){
             $('#divBuktiPembayaran').show();
             $('#buktiSumbangan').attr('required',true);
         }else{
             $('#divBuktiPembayaran').hide();
             $('#buktiSumbangan').attr('required',false);
         }
+        calculateTotal();
     });
 
     $.validator.addMethod("requireOneCheckbox", function(value, element, params) {
@@ -227,6 +234,16 @@
                         }).then((value) => {
                             window.location.href = "{{route('profil.index',['u'=>Crypt::encrypt($keahlian->id)])}}";
                         });
+                    }else if(response.status=='success' && ( $('#caraPembayaran').val()=='4' || $('#caraPembayaran').val()=='5' )){
+                        $('body').waitMe("hide");
+                        swal({
+                            title: "Berjaya!",
+                            text: 'Maklumat tajaan telah berjaya direkodkan.',
+                            icon: "success",
+                            button: "Tutup"
+                        }).then((value) => {
+                            window.location.href = "{{route('profil.index',['u'=>Crypt::encrypt($keahlian->id)])}}";
+                        });
                     }
                     else{
                         window.location.href = "{{env('TOYYIBPAYURL')}}/"+response.fpx.BillCode;
@@ -274,9 +291,13 @@
 
     function calculateTotal() {
         var total = 0;
+        var value = 50;
+        if($('#caraPembayaran').val()==4 || $('#caraPembayaran').val()==5){
+            value = 0;
+        }
         $('.checkboxTahun').each(function () {
             if($(this).is(':checked')){
-                total += parseInt(50);
+                total += parseInt(value);
             }
         });
         var derma = parseInt(0);

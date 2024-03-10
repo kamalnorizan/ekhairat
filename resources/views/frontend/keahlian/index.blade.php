@@ -67,7 +67,7 @@
         @else
             <h1>Kemaskini Maklumat Keahlian</h1>
         @endif
-       
+
         @if ($type=='n')
             <span>Sila lengkapkan borang dibawah untuk mendaftar.</span>
         @else
@@ -120,9 +120,9 @@
                         <div class="card">
                             <div class="card-body">
                                 <div class="fancy-title title-bottom-border">
-                                   
+
                                         <h4>Borang Pendaftaran</h4>
-                                    
+
                                 </div>
 
                                 {!! Form::open(['method' => 'POST', 'route' => 'keahlian.front.permohonanStore', 'class' => '','id'=>'formDaftar']) !!}
@@ -411,7 +411,7 @@
 @section('script')
 
 <script>
-    
+
     $('.statusRadio').change(function(e) {
         e.preventDefault();
         if ($(this).val() == '1') {
