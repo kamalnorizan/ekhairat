@@ -119,6 +119,7 @@ Route::middleware(['auth', 'checkSessionTimeout'])->group(function () {
 
 Route::get('keahlianadm', [KeahlianController::class,'index'])->name('keahlianadm.index');
 Route::post('keahlianadm/ajaxLoadAhli', [KeahlianController::class,'ajaxLoadAhli'])->name('keahlianadm.ajaxLoadAhli');
+Route::post('keahlianadm/deleteKeahlian', [KeahlianController::class,'deleteKeahlian'])->name('keahlianadm.deleteKeahlian');
 
 Route::get('/ketetapan', [KetetapanController::class, 'index'])->name('ketetapan.index');
 Route::post('/ketetapan/updateStatusPembaharuan', [KetetapanController::class, 'updateStatusPembaharuan'])->name('ketetapan.updateStatusPembaharuan');

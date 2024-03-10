@@ -78,7 +78,8 @@ class KeahlianController extends Controller
             return $keahlian->bayaranDetailsPaid->where('jenis','yuran')->last()!=null ? '31-12-'.$keahlian->bayaranDetailsPaid->where('jenis','yuran')->last()->tahun : '-';
         })
         ->addColumn('tindakan', function (Keahlian $keahlian) {
-            $btn = '<a href="'.route('profil.index',['u'=>Crypt::encrypt($keahlian->id)]).'" class="btn btn-sm btn-primary">Perincian</a>';
+            $btn = '<a href="'.route('profil.index',['u'=>Crypt::encrypt($keahlian->id)]).'" class="btn btn-sm btn-primary"><i class="fa fa-eye"></i></a> &nbsp;';
+            $btn .= '<button type="button" data-id="'.Crypt::encrypt($keahlian->id).'" class="btn btn-sm btn-danger btn-pdm"><i class="fa fa-trash"></i></button>';
             return $btn;
         })
         ->filterColumn('nokp', function ($query, $keyword) {
@@ -609,8 +610,15 @@ class KeahlianController extends Controller
     }
 
     function delete(Request $request){
+
         $bayaran = Bayaran::find($request->id);
         $bayaran->forceDelete();
+        return response()->json(['status'=>'success']);
+    }
+
+    function deleteKeahlian(Request $request){
+        $keahlian = Keahlian::find(Crypt::decrypt($request->id));
+        $keahlian->forceDelete();
         return response()->json(['status'=>'success']);
     }
 
